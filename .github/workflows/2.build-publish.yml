@@ -14,7 +14,7 @@ on:
 
 jobs:
   test:
-    name: Test
+    name: 2.1. Test
     runs-on: ubuntu-22.04
     permissions:
       contents: read
@@ -35,7 +35,7 @@ jobs:
 
   build_publish:
     needs: test
-    name: Build and Publish
+    name: 2.2. Build and Publish
     runs-on: ubuntu-22.04
     permissions:
       contents: write
@@ -53,7 +53,7 @@ jobs:
       - name: Build and publish package
         run: |
           echo -e "[pypi]\nusername = __token__\npassword = ${{ secrets.PYPI_API_TOKEN }}" > ~/.pypirc
-          ./scripts/build.sh -c -t -u
+          ./scripts/build.sh -c -t -u -p
           rm -rfv ~/.pypirc
       - name: Create release
         env:
