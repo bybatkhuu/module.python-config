@@ -1,8 +1,8 @@
 # onion_config
 
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/bybatkhuu/mod.python-config/2.build-publish.yml?logo=GitHub)](https://github.com/bybatkhuu/mod.python-config/actions/workflows/2.build-publish.yml)
-[![PyPI](https://img.shields.io/pypi/v/onion-config?logo=PyPi)](https://pypi.org/project/onion-config)
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/bybatkhuu/mod.python-config?logo=GitHub)](https://github.com/bybatkhuu/mod.python-config/releases)
+[![PyPI](https://img.shields.io/pypi/v/onion-config?logo=PyPi)](https://pypi.org/project/onion-config)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/onion-config?logo=Python)](https://docs.conda.io/en/latest/miniconda.html)
 
 `onion_config` is a Python package that allows for easy configuration management. It allows for loading and validating configuration data from environment variables and config files in JSON and YAML formats.
