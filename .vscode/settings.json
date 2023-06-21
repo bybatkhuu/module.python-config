@@ -40,8 +40,7 @@
 		"requirements*.txt": "pip-requirements",
 		"*Dockerfile*": "dockerfile",
 		".dockerignore": "ignore",
-		"*.py.bak": "python",
-		"*.conf.template": "nginx"
+		"*.py.bak": "python"
 	},
 	"files.watcherExclude":
 	{
@@ -65,7 +64,9 @@
 		"**/sdist/**": true,
 		"**/build/**": true,
 		"**/builds/**": true,
+		"**/log/**": true,
 		"**/logs/**": true,
+		"**/backup/**": true,
 		"**/backups/**": true,
 		"**/archive/**": true,
 		"**/data/**": true,
@@ -110,7 +111,9 @@
 		"**/sdist": true,
 		"**/build": true,
 		"**/builds": true,
+		"**/log": true,
 		"**/logs": true,
+		"**/backup": true,
 		"**/backups": true,
 		"**/archive": true,
 		"**/data": true,
