@@ -103,6 +103,10 @@ class ConfigLoader:
 
         Returns:
             Union[BaseConfig, BaseSettings, BaseModel]: Main config object (config_schema) for project.
+
+        Raises:
+            KeyError: If a required environment variable does not exist.
+            Exception: If 'pre_load_hook' or 'config_schema' failed to execute.
         """
 
         self._load_dotenv()
@@ -135,7 +139,10 @@ class ConfigLoader:
     def _check_required_envs(self):
         """Check if required environment variables exist or not.
 
-        If a required environment variable does not exist, an error is logged and the program is terminated with 'exit(2)'.
+        If a required environment variable does not exist, an error is logged and raise an exception.
+
+        Raises:
+            KeyError: If a required environment variable does not exist.
         """
 
         for _env in self.required_envs:
@@ -151,6 +158,9 @@ class ConfigLoader:
 
         Args:
             configs_dir (str, optional): Main configs directory to load all config files. Defaults to ConfigLoader._CONFIGS_DIR.
+
+        Raises:
+            Exception: If failed to load any config file.
         """
 
         _configs_dir = self.configs_dir
@@ -187,7 +197,11 @@ class ConfigLoader:
                     raise
 
     def _load_extra_config_files(self):
-        """Load extra config files from 'PY_EXTRA_CONFIGS_DIR' into 'config_data'."""
+        """Load extra config files from 'PY_EXTRA_CONFIGS_DIR' into 'config_data'.
+
+        Raises:
+            Exception: If failed to load any extra config file.
+        """
 
         if self.extra_configs_dir is None:
             _env_extra_configs_dir = os.getenv("PY_EXTRA_CONFIGS_DIR")
