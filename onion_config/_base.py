@@ -4,6 +4,7 @@
 import os
 import glob
 import json
+import copy
 import logging
 from typing import Union, List, Callable, Type
 
@@ -299,7 +300,7 @@ class ConfigLoader:
                 f"`config_data` attribute type {type(config_data)} is invalid, must be a <dict>."
             )
 
-        self.__config_data = config_data
+        self.__config_data = copy.deepcopy(config_data)
 
     ## config_data ##
 
@@ -398,7 +399,7 @@ class ConfigLoader:
                 f"The 'required_envs' attribute value {required_envs} is invalid, must be a list of <str>!"
             )
 
-        self.__required_envs = required_envs
+        self.__required_envs = copy.deepcopy(required_envs)
 
     ## required_envs ##
 
