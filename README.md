@@ -416,6 +416,8 @@ ONION_CONFIG_EXTRA_DIR="./extra_configs_dir"
 
 - <https://docs.pydantic.dev>
 - <https://github.com/pydantic/pydantic>
+- <https://docs.pydantic.dev/latest/usage/pydantic_settings>
+- <https://github.com/pydantic/pydantic-settings>
 - <https://saurabh-kumar.com/python-dotenv>
 - <https://github.com/theskumar/python-dotenv>
 - <https://packaging.python.org/tutorials/packaging-projects>
