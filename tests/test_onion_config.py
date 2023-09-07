@@ -2,12 +2,13 @@
 
 import os
 import logging
+from typing import Callable
 
 import pytest
-from box import Box
 from pydantic import Field
 
 from onion_config import ConfigLoader, BaseConfig
+
 
 logger = logging.getLogger(__name__)
 
@@ -52,16 +53,22 @@ def test_init(config_loader):
     logger.info("Testing initialization of 'ConfigLoader'...")
 
     assert isinstance(config_loader, ConfigLoader)
+    assert isinstance(config_loader.configs_dir, str)
     assert config_loader.configs_dir == ConfigLoader._CONFIGS_DIR
+    assert issubclass(config_loader.config_schema, BaseConfig)
     assert config_loader.config_schema == BaseConfig
+    assert isinstance(config_loader.required_envs, list)
     assert config_loader.required_envs == []
+    assert isinstance(config_loader.pre_load_hook, Callable)
     assert config_loader.pre_load_hook == ConfigLoader._PRE_LOAD_HOOK
+    assert isinstance(config_loader.env_file_path, str)
     assert config_loader.env_file_path == ConfigLoader._ENV_FILE_PATH
     assert config_loader.extra_configs_dir == None
-    assert isinstance(config_loader.config_data, Box)
+    assert isinstance(config_loader.config_data, dict)
+    assert config_loader.config_data == {}
     assert config_loader.config == None
 
-    logger.info("Done: initialization of 'ConfigLoader'.")
+    logger.info("Done: Initialization of 'ConfigLoader'.")
 
 
 def test_load(config_loader):
@@ -76,14 +83,15 @@ def test_load(config_loader):
 
 
 @pytest.mark.parametrize(
-    "configs_dir, config_schema, required_envs, pre_load_hook, env_file_path, extra_configs_dir,  expected",
+    "configs_dir, config_schema, pre_load_hook, env_file_path, required_envs, config_data, extra_configs_dir,  expected",
     [
         (
             ConfigLoader._CONFIGS_DIR,
             BaseConfig,
-            [],
             lambda config_data: config_data,
             ConfigLoader._ENV_FILE_PATH,
+            [],
+            {},
             None,
             {},
         )
@@ -92,9 +100,10 @@ def test_load(config_loader):
 def test_config_load(
     configs_dir,
     config_schema,
-    required_envs,
     pre_load_hook,
     env_file_path,
+    required_envs,
+    config_data,
     extra_configs_dir,
     expected,
 ):
@@ -103,14 +112,15 @@ def test_config_load(
     _config = ConfigLoader(
         configs_dir=configs_dir,
         config_schema=config_schema,
-        required_envs=required_envs,
         pre_load_hook=pre_load_hook,
         env_file_path=env_file_path,
+        required_envs=required_envs,
+        config_data=config_data,
         extra_configs_dir=extra_configs_dir,
     ).load()
 
     assert isinstance(_config, config_schema)
-    assert _config.dict() == expected
+    assert _config.model_dump() == expected
 
     logger.info("Done: Main config cases.")
 
@@ -169,12 +179,11 @@ def test_load_config_files(config_loader, configs_dir):
     config_loader.configs_dir = _configs_dir
     config_loader._load_config_files()
 
-    assert isinstance(config_loader.config_data, Box)
-    assert config_loader.config_data.json_test.str_val == "some_value"
-    assert config_loader.config_data.json_test.int_val == 123
-    assert config_loader.config_data.yaml_test == True
+    assert isinstance(config_loader.config_data, dict)
+    assert config_loader.config_data["json_test"]["str_val"] == "some_value"
+    assert config_loader.config_data["json_test"]["int_val"] == 123
+    assert config_loader.config_data["yaml_test"] == True
     assert config_loader.config_data == _expected
-    assert config_loader.config_data.to_dict() == _expected
 
     logger.info("Done: 'load_config_files' method.")
 
@@ -199,12 +208,11 @@ def test_load_extra_config_files(tmp_path, config_loader, configs_dir):
     config_loader.extra_configs_dir = _tmp_extra_configs_dir
     config_loader._load_extra_config_files()
 
-    assert isinstance(config_loader.config_data, Box)
-    assert config_loader.config_data.json_test.str_val == "updated_val"
-    assert config_loader.config_data.json_test.int_val == 321
-    assert config_loader.config_data.extra_test == "extra_value"
+    assert isinstance(config_loader.config_data, dict)
+    assert config_loader.config_data["json_test"]["str_val"] == "updated_val"
+    assert config_loader.config_data["json_test"]["int_val"] == 321
+    assert config_loader.config_data["extra_test"] == "extra_value"
     assert config_loader.config_data == _expected
-    assert config_loader.config_data.to_dict() == _expected
 
     logger.info("Done: 'load_extra_config_files' method.")
 
@@ -217,14 +225,15 @@ def test_config(config_loader):
 
     config_loader.config_schema = _ConfigSchema
     config_loader.load()
+    print(config_loader.config.model_dump())
 
     assert isinstance(config_loader.config, _ConfigSchema)
     assert config_loader.config.test_var == "default_val"
-    assert config_loader.config.dict() == {"test_var": "default_val"}
+    assert config_loader.config.model_dump() == {"test_var": "default_val"}
 
     config_loader.config = _ConfigSchema(test_var="new_val")
     assert config_loader.config.test_var == "new_val"
-    assert config_loader.config.dict() == {"test_var": "new_val"}
+    assert config_loader.config.model_dump() == {"test_var": "new_val"}
 
     with pytest.raises(TypeError):
         config_loader.config = {"test_var": "invalid_val"}
@@ -257,17 +266,16 @@ def test_config_schema(config_loader):
 def test_config_data(config_loader):
     logger.info("Testing 'config_data' property...")
 
-    _config_data_dict = {"test_var": "test_val"}
-    _config_data = Box(_config_data_dict)
+    _config_data = {"test_var": "test_val"}
     config_loader.config_data = _config_data
 
-    assert isinstance(config_loader.config_data, Box)
+    assert isinstance(config_loader.config_data, dict)
     assert config_loader.config_data == _config_data
-    assert config_loader.config_data.test_var == "test_val"
-    assert config_loader.config_data.to_dict() == _config_data_dict
+    assert config_loader.config_data["test_var"] == "test_val"
+    assert config_loader.config_data == _config_data
 
     with pytest.raises(TypeError):
-        config_loader.config_data = _config_data_dict
+        config_loader.config_data = _config_data
         config_loader.config_data = "invalid_val"
         config_loader.config_data = 3.14
         config_loader.config_data = False
@@ -355,9 +363,9 @@ def test_pre_load_hook(config_loader):
         return config_data
 
     config_loader.pre_load_hook = _pre_load_hook
-    _config_data: Box = config_loader.pre_load_hook(config_loader.config_data)
+    _config_data: dict = config_loader.pre_load_hook(config_loader.config_data)
 
-    assert isinstance(_config_data, Box)
+    assert isinstance(_config_data, dict)
     assert config_loader.pre_load_hook == _pre_load_hook
 
     with pytest.raises(TypeError):

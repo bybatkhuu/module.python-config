@@ -36,11 +36,10 @@ setup(
     ],
     python_requires=">=3.7",
     install_requires=[
-        "python-dotenv>=1.0.0",
-        "PyYAML>=6.0",
-        "email-validator==1.3.1",
-        "python-box>=7.0.1",
-        "pydantic==1.10.9",
+        "python-dotenv>=1.0.0,<2.0.0",
+        "PyYAML>=6.0.1,<7.0",
+        "python-box>=7.1.1,<8.0.0",
+        "pydantic[email]>=2.1.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0",
     ],
     classifiers=[
         "Development Status :: 4 - Beta",

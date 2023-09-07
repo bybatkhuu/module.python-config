@@ -26,7 +26,7 @@ main()
 	rm -rfv .pytest_cache || exit 2
 	rm -rfv build || exit 2
 	rm -rfv dist || exit 2
-	rm -rfv ./*.egg-info || exit 2
+	# rm -rfv ./*.egg-info || exit 2
 	rm -rfv .coverage || exit 2
 
 	echoOk "Done."

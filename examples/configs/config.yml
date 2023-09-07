@@ -1,6 +1,7 @@
 env: production
 
 app:
+  name: "My App"
   bind_host: "0.0.0.0"
   version: "0.0.1"
   ignore_val: "Ignore me"
