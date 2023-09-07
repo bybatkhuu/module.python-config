@@ -283,6 +283,18 @@ port
 
 ---
 
+## Running Tests
+
+To run tests, run the following command:
+
+```sh
+# Install python development dependencies:
+pip install -r ./requirements.dev.txt
+
+# Run tests:
+python -m pytest -sv
+```
+
 ## FAQ
 
 ### What is the order of loading config?
@@ -295,18 +307,6 @@ Load order:
 4. Load extra config files from `extra_configs_dir` into `config_data`.
 5. Execute `pre_load_hook` method to modify `config_data`.
 6. Init `config_schema` with `config_data` into final **`config`**.
-
-## Running Tests
-
-To run tests, run the following command:
-
-```sh
-# Install python development dependencies:
-pip install -r ./requirements.dev.txt
-
-# Run tests:
-python -m pytest -sv
-```
 
 ## Environment Variables
 
