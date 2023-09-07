@@ -6,7 +6,7 @@
 [![PyPI](https://img.shields.io/pypi/v/onion-config?logo=PyPi)](https://pypi.org/project/onion-config)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/onion-config?logo=Python)](https://docs.conda.io/en/latest/miniconda.html)
 
-`onion_config` is a Python package that allows for easy configuration management. It allows for loading and validating configuration data from environment variables and config files in JSON and YAML formats.
+`onion_config` is a python package that allows for easy configuration management. It allows for loading and validating configuration data from environment variables and config files in JSON and YAML formats.
 
 `Pydantic` based custom config package for python projects.
 
@@ -109,44 +109,94 @@ export PYTHONPATH="${PWD}:${PYTHONPATH}"
 
 ## Usage/Examples
 
-### **Simple**
-
 To use `onion_config`, import the `ConfigLoader` class from the package:
 
 ```python
-from onion_config import ConfigLoader
+from onion_config import ConfigLoader, BaseConfig
 ```
 
-You can then create an instance of `ConfigLoader`:
+You can create an instance of `ConfigLoader` with `auto_load` flag. This will automatically load configuration data from environment variables and config files located in the default directory (`'./configs'`). The configuration data can then be accessed via the `config` property of the `ConfigLoader` instance:
 
 ```python
-config_loader = ConfigLoader(auto_load=True)
+config: BaseConfig = ConfigLoader(auto_load=True).config
 ```
 
-This will automatically load configuration data from environment variables and config files located in the default directory (`'./configs'`). The configuration data can then be accessed via the `config` property of the `ConfigLoader` instance:
+### **Simple**
+
+[**`configs/1.base.yml`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/simple/configs/1.base.yml):
+
+```yaml
+env: test
+
+app:
+  name: "My App"
+  version: "0.0.1"
+  nested:
+    key: "value"
+```
+
+[**`configs/2.extra.yml`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/simple/configs/2.extra.yml):
+
+```yaml
+app:
+  name: "New App"
+  nested:
+    some: "value"
+  description: "Description of my app."
+
+another_val:
+  extra: 1
+```
+
+[**`main.py`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/simple/main.py)
 
 ```python
-config = config_loader.config
+import sys
+import pprint
+import logging
+
+from onion_config import ConfigLoader, BaseConfig
+
+
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
+try:
+    config: BaseConfig = ConfigLoader().load()
+except Exception:
+    logger.exception("Failed to load config:")
+    exit(2)
+
+if __name__ == "__main__":
+    logger.info(f" App name: {config.app['name']}")
+    logger.info(f" Config:\n{pprint.pformat(config.model_dump())}\n")
+```
+
+Run the [**`examples/simple`**](https://github.com/bybatkhuu/mod.python-config/tree/main/examples/simple):
+
+```sh
+cd ./examples/simple
+
+python ./main.py
+```
+
+Output:
+
+```txt
+INFO:__main__: App name: New App
+INFO:__main__: Config:
+{'another_val': {'extra': 1},
+ 'app': {'description': 'Description of my app.',
+         'name': 'New App',
+         'nested': {'key': 'value', 'some': 'value'},
+         'version': '0.0.1'},
+ 'env': 'test'}
 ```
 
 ### **Advanced**
 
-[**`configs/config.yml`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/configs/config.yml):
-
-```yaml
-env: production
-
-app:
-  name: "My App"
-  bind_host: "0.0.0.0"
-  version: "0.0.1"
-  ignore_val: "Ignore me"
-
-logger:
-  output: "stdout"
-```
-
-[**`configs/logger.json`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/configs/logger.json):
+[**`configs/logger.json`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/configs/logger.json):
 
 ```json
 {
@@ -158,7 +208,23 @@ logger:
 }
 ```
 
-[**`.env`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/.env):
+[**`configs/config.yml`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/configs/config.yml):
+
+```yaml
+env: production
+
+app:
+  name: "My App"
+  port: 9000
+  bind_host: "0.0.0.0"
+  version: "0.0.1"
+  ignore_val: "Ignore me"
+
+logger:
+  output: "stdout"
+```
+
+[**`.env`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/.env):
 
 ```sh
 ENV=development
@@ -169,31 +235,27 @@ APP_NAME="New App"
 APP_SECRET="my_secret"
 ```
 
-[**`main.py`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/main.py):
+[**`logger.py`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/logger.py):
 
 ```python
 import sys
-import pprint
 import logging
+
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logger = logging.getLogger(__name__)
+```
+
+[**`schema.py`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/schema.py):
+
+```python
 from enum import Enum
 from typing import Union
 
 from pydantic import Field, SecretStr
 from pydantic_settings import SettingsConfigDict
 
-from onion_config import ConfigLoader, BaseConfig
+from onion_config import BaseConfig
 
-
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-
-# Pre-load function to modify config data before loading and validation:
-def _pre_load_hook(config_data: dict) -> dict:
-    config_data["app"]["port"] = "80"
-    config_data["extra_val"] = "Something extra!"
-
-    return config_data
 
 # Environments as Enum:
 class EnvEnum(str, Enum):
@@ -219,18 +281,45 @@ class ConfigSchema(BaseConfig):
     env: EnvEnum = Field(EnvEnum.LOCAL)
     debug: bool = Field(False)
     app: AppConfig = Field(...)
+```
+
+[**`config.py`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/config.py):
+
+```python
+from onion_config import ConfigLoader
+
+from logger import logger
+from schema import ConfigSchema
+
+
+# Pre-load function to modify config data before loading and validation:
+def _pre_load_hook(config_data: dict) -> dict:
+    config_data["app"]["port"] = "80"
+    config_data["extra_val"] = "Something extra!"
+    return config_data
+
+config = None
+try:
+    _config_loader = ConfigLoader(
+        config_schema=ConfigSchema, pre_load_hook=_pre_load_hook
+    )
+    # Main config object:
+    config: ConfigSchema = _config_loader.load()
+except Exception:
+    logger.exception("Failed to load config:")
+    exit(2)
+```
+
+[**`app.py`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/app.py):
+
+```python
+import pprint
+
+from config import config
+from logger import logger
 
 
 if __name__ == "__main__":
-    try:
-        # Main 'config' object for usage:
-        config: ConfigSchema = ConfigLoader(
-            config_schema=ConfigSchema, pre_load_hook=_pre_load_hook
-        ).load()
-    except Exception:
-        logger.exception("Failed to load config:")
-        exit(2)
-
     logger.info(f" ENV: {config.env}")
     logger.info(f" DEBUG: {config.debug}")
     logger.info(f" Extra: {config.extra_val}")
@@ -246,25 +335,25 @@ if __name__ == "__main__":
         logger.error(f" {e}\n")
 ```
 
-Run the [**`example`**](https://github.com/bybatkhuu/mod.python-config/tree/main/examples):
+Run the [**`examples/advanced`**](https://github.com/bybatkhuu/mod.python-config/tree/main/examples/advanced):
 
 ```sh
-cd ./examples
+cd ./examples/advanced
 
-python ./main.py
+python ./app.py
 ```
 
 Output:
 
 ```txt
-INFO:__main__: ENV: development
-INFO:__main__: DEBUG: True
-INFO:__main__: Extra: Something extra!
-INFO:__main__: Logger: {'level': 'info', 'output': 'stdout'}
-INFO:__main__: App: name='New App' bind_host='0.0.0.0' port=80 secret=SecretStr('**********') version='0.0.1' description=None
-INFO:__main__: Secret: 'my_secret'
+INFO:logger: ENV: development
+INFO:logger: DEBUG: True
+INFO:logger: Extra: Something extra!
+INFO:logger: Logger: {'level': 'info', 'output': 'stdout'}
+INFO:logger: App: name='New App' bind_host='0.0.0.0' port=80 secret=SecretStr('**********') version='0.0.1' description=None
+INFO:logger: Secret: 'my_secret'
 
-INFO:__main__: Config:
+INFO:logger: Config:
 {'app': {'bind_host': '0.0.0.0',
          'description': None,
          'name': 'New App',
@@ -276,7 +365,7 @@ INFO:__main__: Config:
  'extra_val': 'Something extra!',
  'logger': {'level': 'info', 'output': 'stdout'}}
 
-ERROR:__main__: 1 validation error for AppConfig
+ERROR:logger: 1 validation error for AppConfig
 port
   Instance is frozen [type=frozen_instance, input_value=8443, input_type=int]
 ```
@@ -288,8 +377,8 @@ port
 To run tests, run the following command:
 
 ```sh
-# Install python development dependencies:
-pip install -r ./requirements.dev.txt
+# Install python test dependencies:
+pip install -r ./requirements.test.txt
 
 # Run tests:
 python -m pytest -sv
