@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
 
-from .base import ConfigLoader, BaseConfig, __version__
+from ._base import ConfigLoader, BaseConfig, __version__

@@ -1,5 +1,6 @@
 # onion_config
 
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/bybatkhuu/mod.python-config/2.build-publish.yml?logo=GitHub)](https://github.com/bybatkhuu/mod.python-config/actions/workflows/2.build-publish.yml)
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/bybatkhuu/mod.python-config?logo=GitHub)](https://github.com/bybatkhuu/mod.python-config/releases)
 [![PyPI](https://img.shields.io/pypi/v/onion-config?logo=PyPi)](https://pypi.org/project/onion-config)
@@ -13,7 +14,6 @@
 
 - **Main config** based on **Pydantic schema** - <https://pypi.org/project/pydantic>
 - Load **environment variables** - <https://pypi.org/project/python-dotenv>
-- Config data based on **Python-box** - <https://pypi.org/project/python-box>
 - Load configs from **YAML** and **JSON** files
 - Update the default config with additional configurations (**`extra_configs`** directory)
 - **Pre-load hook** function to modify config data before loading and validation
@@ -101,7 +101,7 @@ git clone https://github.com/bybatkhuu/mod.python-config.git onion_config
 cd ./onion_config
 
 # Install python dependencies:
-< ./requirements.txt grep -v '^#' | xargs -t -L 1 pip install
+pip install -r ./requirements.txt
 
 # Add current path to PYTHONPATH:
 export PYTHONPATH="${PWD}:${PYTHONPATH}"
@@ -137,6 +137,7 @@ config = config_loader.config
 env: production
 
 app:
+  name: "My App"
   bind_host: "0.0.0.0"
   version: "0.0.1"
   ignore_val: "Ignore me"
@@ -160,7 +161,7 @@ logger:
 [**`.env`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/.env):
 
 ```sh
-ENVIRONMENT=development
+ENV=development
 
 DEBUG=true
 
@@ -177,8 +178,8 @@ import logging
 from enum import Enum
 from typing import Union
 
-from box import Box
 from pydantic import Field, SecretStr
+from pydantic_settings import SettingsConfigDict
 
 from onion_config import ConfigLoader, BaseConfig
 
@@ -188,12 +189,11 @@ logger = logging.getLogger(__name__)
 
 
 # Pre-load function to modify config data before loading and validation:
-def _pre_load_hook(config_data: Box) -> Box:
-    config_data.app.port = "80"
-    config_data.extra_val = "Something extra!"
+def _pre_load_hook(config_data: dict) -> dict:
+    config_data["app"]["port"] = "80"
+    config_data["extra_val"] = "Something extra!"
 
     return config_data
-
 
 # Environments as Enum:
 class EnvEnum(str, Enum):
@@ -203,24 +203,20 @@ class EnvEnum(str, Enum):
     STAGING = "staging"
     PRODUCTION = "production"
 
-
 # App config schema:
 class AppConfig(BaseConfig):
     name: str = Field("App", min_length=2, max_length=32)
     bind_host: str = Field("localhost", min_length=2, max_length=128)
     port: int = Field(8000, ge=80, lt=65536)
-    secret: str = Field(..., min_length=8, max_length=64)
-    version: SecretStr = Field(..., min_length=5, max_length=16)
+    secret: SecretStr = Field(..., min_length=8, max_length=64)
+    version: str = Field(..., min_length=5, max_length=16)
     description: Union[str, None] = Field(None, min_length=4, max_length=64)
 
-    class Config:
-        extra = "ignore"
-        env_prefix = "APP_"
-
+    model_config = SettingsConfigDict(extra="ignore", env_prefix="APP_")
 
 # Main config schema:
 class ConfigSchema(BaseConfig):
-    env: EnvEnum = Field(EnvEnum.LOCAL, env="ENVIRONMENT")
+    env: EnvEnum = Field(EnvEnum.LOCAL)
     debug: bool = Field(False)
     app: AppConfig = Field(...)
 
@@ -239,8 +235,9 @@ if __name__ == "__main__":
     logger.info(f" DEBUG: {config.debug}")
     logger.info(f" Extra: {config.extra_val}")
     logger.info(f" Logger: {config.logger}")
-    logger.info(f" App: {config.app}\n")
-    logger.info(f" Config:\n{pprint.pformat(config.dict())}\n")
+    logger.info(f" App: {config.app}")
+    logger.info(f" Secret: '{config.app.secret.get_secret_value()}'\n")
+    logger.info(f" Config:\n{pprint.pformat(config.model_dump())}\n")
 
     try:
         # This will raise ValidationError
@@ -249,10 +246,11 @@ if __name__ == "__main__":
         logger.error(f" {e}\n")
 ```
 
-Run the [`example`](https://github.com/bybatkhuu/mod.python-config/tree/main/examples):
+Run the [**`example`**](https://github.com/bybatkhuu/mod.python-config/tree/main/examples):
 
 ```sh
 cd ./examples
+
 python ./main.py
 ```
 
@@ -263,46 +261,64 @@ INFO:__main__: ENV: development
 INFO:__main__: DEBUG: True
 INFO:__main__: Extra: Something extra!
 INFO:__main__: Logger: {'level': 'info', 'output': 'stdout'}
-INFO:__main__: App: name='New App' bind_host='0.0.0.0' port=80 secret='my_secret' version=SecretStr('**********') description=None
+INFO:__main__: App: name='New App' bind_host='0.0.0.0' port=80 secret=SecretStr('**********') version='0.0.1' description=None
+INFO:__main__: Secret: 'my_secret'
 
 INFO:__main__: Config:
 {'app': {'bind_host': '0.0.0.0',
          'description': None,
          'name': 'New App',
          'port': 80,
-         'secret': 'my_secret',
-         'version': SecretStr('**********')},
+         'secret': SecretStr('**********'),
+         'version': '0.0.1'},
  'debug': True,
  'env': <EnvEnum.DEVELOPMENT: 'development'>,
  'extra_val': 'Something extra!',
  'logger': {'level': 'info', 'output': 'stdout'}}
 
-ERROR:__main__: "AppConfig" is immutable and does not support item assignment
+ERROR:__main__: 1 validation error for AppConfig
+port
+  Instance is frozen [type=frozen_instance, input_value=8443, input_type=int]
 ```
 
 ---
+
+## FAQ
+
+### What is the order of loading config?
+
+Load order:
+
+1. Load environment variables from `.env` file.
+2. Check required environment variables are exist or not.
+3. Load config files from `configs_dir` into `config_data`.
+4. Load extra config files from `extra_configs_dir` into `config_data`.
+5. Execute `pre_load_hook` method to modify `config_data`.
+6. Init `config_schema` with `config_data` into final **`config`**.
 
 ## Running Tests
 
 To run tests, run the following command:
 
 ```sh
+# Install python development dependencies:
+pip install -r ./requirements.dev.txt
+
+# Run tests:
 python -m pytest -sv
 ```
-
-These tests are designed to validate the functionality and reliability of the onion-config package.
 
 ## Environment Variables
 
 You can use the following environment variables inside [**`.env.example`**](https://github.com/bybatkhuu/mod.python-config/blob/main/.env.example) file:
 
 ```sh
-PY_EXTRA_CONFIGS_DIR="./extra_configs"
+ONION_CONFIG_EXTRA_DIR="./extra_configs_dir"
 ```
 
 ## Documentation
 
-- [onion_config](https://github.com/bybatkhuu/mod.python-config/blob/main/docs/README.md)
+- [docs](https://github.com/bybatkhuu/mod.python-config/blob/main/docs/README.md)
 - [scripts](https://github.com/bybatkhuu/mod.python-config/blob/main/docs/scripts/README.md)
 
 ---
@@ -313,6 +329,4 @@ PY_EXTRA_CONFIGS_DIR="./extra_configs"
 - <https://github.com/pydantic/pydantic>
 - <https://saurabh-kumar.com/python-dotenv>
 - <https://github.com/theskumar/python-dotenv>
-- <https://github.com/cdgriffith/Box/wiki>
-- <https://github.com/cdgriffith/Box>
 - <https://packaging.python.org/tutorials/packaging-projects>
