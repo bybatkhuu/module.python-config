@@ -14,8 +14,8 @@ from pydantic import BaseModel, validate_call
 from pydantic_settings import BaseSettings
 
 ## Internal modules
-from ._schema import BaseConfig
 from ._utils import deep_merge
+from ._schema import BaseConfig
 from .__version__ import __version__
 
 
@@ -174,7 +174,7 @@ class ConfigLoader:
             for _json_file_path in _json_file_paths:
                 try:
                     with open(_json_file_path, "r", encoding="utf8") as _json_file:
-                        _new_config_dict = json.load(_json_file)
+                        _new_config_dict = json.load(_json_file) or {}
                         self.config_data = deep_merge(
                             self.config_data, _new_config_dict
                         )
@@ -191,7 +191,7 @@ class ConfigLoader:
             for _yaml_file_path in _yaml_file_paths:
                 try:
                     with open(_yaml_file_path, "r", encoding="utf8") as _yaml_file:
-                        _new_config_dict = yaml.safe_load(_yaml_file)
+                        _new_config_dict = yaml.safe_load(_yaml_file) or {}
                         self.config_data = deep_merge(
                             self.config_data, _new_config_dict
                         )

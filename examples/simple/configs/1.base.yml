@@ -1,0 +1,7 @@
+env: test
+
+app:
+  name: "My App"
+  version: "0.0.1"
+  nested:
+    key: "value"

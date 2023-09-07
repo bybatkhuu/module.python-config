@@ -1,0 +1,8 @@
+app:
+  name: "New App"
+  nested:
+    some: "value"
+  description: "Description of my app."
+
+another_val:
+  extra: 1
