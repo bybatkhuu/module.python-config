@@ -40,12 +40,8 @@ The `ConfigLoader` class is the main class of the `onion_config` package. An ins
 ### Load order
 
 1. Load all dotenv files from `env_file_paths` into environment variables.
-1.1. Load each dotenv file into environment variables.
 2. Check if required environment variables exist or not.
 3. Load all config files from `configs_dirs` into `config_data`.
-3.1. Load config files from each config directory into `config_data`.
-3.1.a. Load each YAML config file into `config_data`.
-3.1.b. Load each JSON config file into `config_data`.
 4. Load extra config files from `extra_dir` into `config_data`.
 5. Execute `pre_load_hook` method to modify `config_data`.
 6. Init `config_schema` with `config_data` into final `config`.
