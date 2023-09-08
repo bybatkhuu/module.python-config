@@ -123,6 +123,12 @@ config: BaseConfig = ConfigLoader(auto_load=True).config
 
 ### **Simple**
 
+[**`.env`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/simple/.env)
+
+```sh
+ENV=production
+```
+
 [**`configs/1.base.yml`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/simple/configs/1.base.yml):
 
 ```yaml
@@ -162,8 +168,12 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+class ConfigSchema(BaseConfig):
+    env: str = "local"
+
+
 try:
-    config: BaseConfig = ConfigLoader().load()
+    config: ConfigSchema = ConfigLoader(config_schema=ConfigSchema).load()
 except Exception:
     logger.exception("Failed to load config:")
     exit(2)
@@ -191,27 +201,32 @@ INFO:__main__: Config:
          'name': 'New App',
          'nested': {'key': 'value', 'some': 'value'},
          'version': '0.0.1'},
- 'env': 'test'}
+ 'env': 'production'}
 ```
 
 ### **Advanced**
 
-[**`configs/logger.json`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/configs/logger.json):
+[**`.env.base`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/.env.base):
 
-```json
-{
-    "logger":
-    {
-        "level": "info",
-        "output": "file"
-    }
-}
+```sh
+ENV=development
+DEBUG=true
+APP_NAME="Old App"
+ONION_CONFIG_EXTRA_DIR="extra_configs"
+```
+
+[**`.env.prod`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/.env.prod):
+
+```sh
+ENV=production
+APP_NAME="New App"
+APP_SECRET="my_secret"
 ```
 
 [**`configs/config.yml`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/configs/config.yml):
 
 ```yaml
-env: production
+env: local
 
 app:
   name: "My App"
@@ -221,18 +236,44 @@ app:
   ignore_val: "Ignore me"
 
 logger:
-  output: "stdout"
+  output: "file"
 ```
 
-[**`.env`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/.env):
+[**`configs/logger.json`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/configs/logger.json):
 
-```sh
-ENV=development
+```json
+{
+    "logger": {
+        "level": "info",
+        "output": "stdout"
+    }
+}
+```
 
-DEBUG=true
+[**`configs_2/config.yml`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/configs_2/config.yml):
 
-APP_NAME="New App"
-APP_SECRET="my_secret"
+```yaml
+extra:
+  config:
+    key1: 1
+```
+
+[**`configs_2/config_2.yml`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/configs_2/config_2.yml):
+
+```yaml
+extra:
+  config:
+    key2: 2
+```
+
+[**`extra_configs/extra.json`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/extra_configs/extra.json):
+
+```json
+{
+    "extra": {
+        "type": "json"
+    }
+}
 ```
 
 [**`logger.py`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/logger.py):
@@ -301,7 +342,12 @@ def _pre_load_hook(config_data: dict) -> dict:
 config = None
 try:
     _config_loader = ConfigLoader(
-        config_schema=ConfigSchema, pre_load_hook=_pre_load_hook
+        config_schema=ConfigSchema,
+        configs_dirs=["configs", "configs_2", "/not_exixts/path/configs_3"],
+        env_file_paths=[".env", ".env.base", ".env.prod"],
+        pre_load_hook=_pre_load_hook,
+        config_data={"base": "start_value"},
+        quiet=False,
     )
     # Main config object:
     config: ConfigSchema = _config_loader.load()
@@ -346,10 +392,12 @@ python ./app.py
 Output:
 
 ```txt
-INFO:logger: ENV: development
+WARNING:onion_config._base:'/home/user/workspaces/projects/onion_config/examples/advanced/.env' file is not exist!
+WARNING:onion_config._base:'/not_exixts/path/configs_3' directory is not exist!
+INFO:logger: ENV: production
 INFO:logger: DEBUG: True
 INFO:logger: Extra: Something extra!
-INFO:logger: Logger: {'level': 'info', 'output': 'stdout'}
+INFO:logger: Logger: {'output': 'stdout', 'level': 'info'}
 INFO:logger: App: name='New App' bind_host='0.0.0.0' port=80 secret=SecretStr('**********') version='0.0.1' description=None
 INFO:logger: Secret: 'my_secret'
 
@@ -360,8 +408,10 @@ INFO:logger: Config:
          'port': 80,
          'secret': SecretStr('**********'),
          'version': '0.0.1'},
+ 'base': 'start_value',
  'debug': True,
- 'env': <EnvEnum.DEVELOPMENT: 'development'>,
+ 'env': <EnvEnum.PRODUCTION: 'production'>,
+ 'extra': {'config': {'key1': 1, 'key2': 2}, 'type': 'json'},
  'extra_val': 'Something extra!',
  'logger': {'level': 'info', 'output': 'stdout'}}
 
@@ -390,19 +440,23 @@ python -m pytest -sv
 
 Load order:
 
-1. Load environment variables from `.env` file.
-2. Check required environment variables are exist or not.
-3. Load config files from `configs_dir` into `config_data`.
-4. Load extra config files from `extra_configs_dir` into `config_data`.
+1. Load all dotenv files from `env_file_paths` into environment variables.
+1.1. Load each dotenv file into environment variables.
+2. Check if required environment variables exist or not.
+3. Load all config files from `configs_dirs` into `config_data`.
+3.1. Load config files from each config directory into `config_data`.
+3.1.a. Load each YAML config file into `config_data`.
+3.1.b. Load each JSON config file into `config_data`.
+4. Load extra config files from `extra_dir` into `config_data`.
 5. Execute `pre_load_hook` method to modify `config_data`.
-6. Init `config_schema` with `config_data` into final **`config`**.
+6. Init `config_schema` with `config_data` into final `config`.
 
 ## Environment Variables
 
 You can use the following environment variables inside [**`.env.example`**](https://github.com/bybatkhuu/mod.python-config/blob/main/.env.example) file:
 
 ```sh
-ONION_CONFIG_EXTRA_DIR="./extra_configs_dir"
+ONION_CONFIG_EXTRA_DIR="./extra_dir"
 ```
 
 ## Documentation

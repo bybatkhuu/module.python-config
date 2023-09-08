@@ -12,8 +12,12 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+class ConfigSchema(BaseConfig):
+    env: str = "local"
+
+
 try:
-    config: BaseConfig = ConfigLoader().load()
+    config: ConfigSchema = ConfigLoader(config_schema=ConfigSchema).load()
 except Exception:
     logger.exception("Failed to load config:")
     exit(2)

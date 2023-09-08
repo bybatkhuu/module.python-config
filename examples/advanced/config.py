@@ -12,11 +12,15 @@ def _pre_load_hook(config_data: dict) -> dict:
     config_data["extra_val"] = "Something extra!"
     return config_data
 
-
 config = None
 try:
     _config_loader = ConfigLoader(
-        config_schema=ConfigSchema, pre_load_hook=_pre_load_hook
+        config_schema=ConfigSchema,
+        configs_dirs=["configs", "configs_2", "/not_exixts/path/configs_3"],
+        env_file_paths=[".env", ".env.base", ".env.prod"],
+        pre_load_hook=_pre_load_hook,
+        config_data={"base": "start_value"},
+        quiet=False,
     )
     # Main config object:
     config: ConfigSchema = _config_loader.load()

@@ -53,17 +53,17 @@ def test_init(config_loader):
     logger.info("Testing initialization of 'ConfigLoader'...")
 
     assert isinstance(config_loader, ConfigLoader)
-    assert isinstance(config_loader.configs_dir, str)
-    assert config_loader.configs_dir == ConfigLoader._CONFIGS_DIR
+    assert isinstance(config_loader.configs_dirs, list)
+    assert config_loader.configs_dirs == [ConfigLoader._CONFIGS_DIR]
     assert issubclass(config_loader.config_schema, BaseConfig)
     assert config_loader.config_schema == BaseConfig
     assert isinstance(config_loader.required_envs, list)
     assert config_loader.required_envs == []
     assert isinstance(config_loader.pre_load_hook, Callable)
     assert config_loader.pre_load_hook == ConfigLoader._PRE_LOAD_HOOK
-    assert isinstance(config_loader.env_file_path, str)
-    assert config_loader.env_file_path == ConfigLoader._ENV_FILE_PATH
-    assert config_loader.extra_configs_dir == None
+    assert isinstance(config_loader.env_file_paths, list)
+    assert config_loader.env_file_paths == [ConfigLoader._ENV_FILE_PATH]
+    assert config_loader.extra_dir == None
     assert isinstance(config_loader.config_data, dict)
     assert config_loader.config_data == {}
     assert config_loader.config == None
@@ -83,40 +83,43 @@ def test_load(config_loader):
 
 
 @pytest.mark.parametrize(
-    "configs_dir, config_schema, pre_load_hook, env_file_path, required_envs, config_data, extra_configs_dir,  expected",
+    "config_schema, configs_dirs, env_file_paths, required_envs, pre_load_hook, extra_dir, config_data, quiet, expected",
     [
         (
-            ConfigLoader._CONFIGS_DIR,
             BaseConfig,
-            lambda config_data: config_data,
+            ConfigLoader._CONFIGS_DIR,
             ConfigLoader._ENV_FILE_PATH,
             [],
-            {},
+            lambda config_data: config_data,
             None,
+            {},
+            True,
             {},
         )
     ],
 )
 def test_config_load(
-    configs_dir,
     config_schema,
-    pre_load_hook,
-    env_file_path,
+    configs_dirs,
+    env_file_paths,
     required_envs,
+    pre_load_hook,
+    extra_dir,
     config_data,
-    extra_configs_dir,
+    quiet,
     expected,
 ):
     logger.info("Testing main config cases...")
 
     _config = ConfigLoader(
-        configs_dir=configs_dir,
         config_schema=config_schema,
-        pre_load_hook=pre_load_hook,
-        env_file_path=env_file_path,
+        configs_dirs=configs_dirs,
+        env_file_paths=env_file_paths,
         required_envs=required_envs,
+        pre_load_hook=pre_load_hook,
+        extra_dir=extra_dir,
         config_data=config_data,
-        extra_configs_dir=extra_configs_dir,
+        quiet=quiet,
     ).load()
 
     assert isinstance(_config, config_schema)
@@ -133,8 +136,8 @@ def test_config_load(
         ("TEST_ENV_VAR=123", "123"),
     ],
 )
-def test_load_dotenv(tmp_path, config_loader, content, expected):
-    logger.info("Testing 'load_dotenv' method...")
+def test_load_dotenv_files(tmp_path, config_loader, content, expected):
+    logger.info("Testing '_load_dotenv_files' method...")
 
     _tmp_envs_dir_pl = tmp_path / "envs"
     _tmp_envs_dir_pl.mkdir()
@@ -142,18 +145,18 @@ def test_load_dotenv(tmp_path, config_loader, content, expected):
     _tmp_env_file_pl.write_text(content)
     _tmp_env_path = str(_tmp_env_file_pl)
 
-    config_loader.env_file_path = _tmp_env_path
-    config_loader._load_dotenv()
+    config_loader.env_file_paths = _tmp_env_path
+    config_loader._load_dotenv_files()
     _env_var = content.split("=")[0]
 
-    assert config_loader.env_file_path == _tmp_env_path
+    assert config_loader.env_file_paths == [_tmp_env_path]
     assert os.getenv(_env_var) == expected
 
-    logger.info("Done: 'load_dotenv' method.")
+    logger.info("Done: '_load_dotenv_files' method.")
 
 
 def test_check_required_envs(config_loader):
-    logger.info("Testing 'check_required_envs' method...")
+    logger.info("Testing '_check_required_envs' method...")
 
     os.environ["REQUIRED_ENV_VAR"] = "required_value"
 
@@ -169,15 +172,15 @@ def test_check_required_envs(config_loader):
         config_loader._check_required_envs()
         assert os.getenv(_none_existent_env_var) == None
 
-    logger.info("Done: 'check_required_envs' method.")
+    logger.info("Done: '_check_required_envs' method.")
 
 
-def test_load_config_files(config_loader, configs_dir):
-    logger.info("Testing 'load_config_files' method...")
+def test_load_configs_dirs(config_loader, configs_dir):
+    logger.info("Testing '_load_configs_dirs' method...")
 
     _configs_dir, _expected = configs_dir
-    config_loader.configs_dir = _configs_dir
-    config_loader._load_config_files()
+    config_loader.configs_dirs = [_configs_dir]
+    config_loader._load_configs_dirs()
 
     assert isinstance(config_loader.config_data, dict)
     assert config_loader.config_data["json_test"]["str_val"] == "some_value"
@@ -185,28 +188,29 @@ def test_load_config_files(config_loader, configs_dir):
     assert config_loader.config_data["yaml_test"] == True
     assert config_loader.config_data == _expected
 
-    logger.info("Done: 'load_config_files' method.")
+    logger.info("Done: '_load_configs_dirs' method.")
 
 
-def test_load_extra_config_files(tmp_path, config_loader, configs_dir):
-    logger.info("Testing 'load_extra_config_files' method...")
+def test_load_extra_dir(tmp_path, config_loader, configs_dir):
+    logger.info("Testing '_load_extra_dir' method...")
 
     _configs_dir, _expected = configs_dir
-    config_loader._load_config_files(configs_dir=_configs_dir)
+    config_loader.configs_dirs = [_configs_dir]
+    config_loader._load_configs_dirs()
 
-    _tmp_extra_configs_dir_pl = tmp_path / "extra_configs"
-    _tmp_extra_configs_dir_pl.mkdir()
-    _tmp_yaml_file_pl = (_tmp_extra_configs_dir_pl / "test.yaml").resolve()
+    _tmp_extra_dir_pl = tmp_path / "extra_dir"
+    _tmp_extra_dir_pl.mkdir()
+    _tmp_yaml_file_pl = (_tmp_extra_dir_pl / "test.yaml").resolve()
     _tmp_yaml_file_pl.write_text(
         'json_test:\n  str_val: "updated_val"\n  int_val: 321\nextra_test: "extra_value"'
     )
-    _tmp_extra_configs_dir = str(_tmp_extra_configs_dir_pl)
+    _tmp_extra_dir = str(_tmp_extra_dir_pl)
     _expected["json_test"]["int_val"] = 321
     _expected["json_test"]["str_val"] = "updated_val"
     _expected["extra_test"] = "extra_value"
 
-    config_loader.extra_configs_dir = _tmp_extra_configs_dir
-    config_loader._load_extra_config_files()
+    config_loader.extra_dir = _tmp_extra_dir
+    config_loader._load_extra_dir()
 
     assert isinstance(config_loader.config_data, dict)
     assert config_loader.config_data["json_test"]["str_val"] == "updated_val"
@@ -214,7 +218,7 @@ def test_load_extra_config_files(tmp_path, config_loader, configs_dir):
     assert config_loader.config_data["extra_test"] == "extra_value"
     assert config_loader.config_data == _expected
 
-    logger.info("Done: 'load_extra_config_files' method.")
+    logger.info("Done: '_load_extra_dir' method.")
 
 
 def test_config(config_loader):
@@ -225,7 +229,6 @@ def test_config(config_loader):
 
     config_loader.config_schema = _ConfigSchema
     config_loader.load()
-    print(config_loader.config.model_dump())
 
     assert isinstance(config_loader.config, _ConfigSchema)
     assert config_loader.config.test_var == "default_val"
@@ -284,55 +287,55 @@ def test_config_data(config_loader):
     logger.info("Done: 'config_data' property.")
 
 
-def test_configs_dir(config_loader):
-    logger.info("Testing 'configs_dir' property...")
+def test_configs_dirs(config_loader):
+    logger.info("Testing 'configs_dirs' property...")
 
-    config_loader.configs_dir = "/tmp/pytest/configs_dir"
-    assert config_loader.configs_dir == "/tmp/pytest/configs_dir"
-
-    with pytest.raises(TypeError):
-        config_loader.configs_dir = 3.14
-        config_loader.configs_dir = False
-        config_loader.configs_dir = None
-
-    with pytest.raises(ValueError):
-        config_loader.configs_dir = ""
-
-    logger.info("Done: 'configs_dir' property.")
-
-
-def test_extra_configs_dir(config_loader):
-    logger.info("Testing 'extra_configs_dir' property...")
-
-    config_loader.extra_configs_dir = "/tmp/pytest/extra_configs_dir"
-    assert config_loader.extra_configs_dir == "/tmp/pytest/extra_configs_dir"
+    config_loader.configs_dirs = "/tmp/pytest/configs_dir"
+    assert config_loader.configs_dirs == ["/tmp/pytest/configs_dir"]
 
     with pytest.raises(TypeError):
-        config_loader.extra_configs_dir = 3.14
-        config_loader.extra_configs_dir = False
-        config_loader.extra_configs_dir = None
+        config_loader.configs_dirs = 3.14
+        config_loader.configs_dirs = False
+        config_loader.configs_dirs = None
 
     with pytest.raises(ValueError):
-        config_loader.extra_configs_dir = ""
+        config_loader.configs_dirs = ""
 
-    logger.info("Done: 'extra_configs_dir' property.")
+    logger.info("Done: 'configs_dirs' property.")
 
 
-def test_env_file_path(config_loader):
-    logger.info("Testing 'env_file_path' property...")
+def test_extra_dir(config_loader):
+    logger.info("Testing 'extra_dir' property...")
 
-    config_loader.env_file_path = "/tmp/pytest/.env"
-    assert config_loader.env_file_path == "/tmp/pytest/.env"
+    config_loader.extra_dir = "/tmp/pytest/extra_dir"
+    assert config_loader.extra_dir == "/tmp/pytest/extra_dir"
 
     with pytest.raises(TypeError):
-        config_loader.env_file_path = 3.14
-        config_loader.env_file_path = False
-        config_loader.env_file_path = None
+        config_loader.extra_dir = 3.14
+        config_loader.extra_dir = False
+        config_loader.extra_dir = None
 
     with pytest.raises(ValueError):
-        config_loader.env_file_path = ""
+        config_loader.extra_dir = ""
 
-    logger.info("Done: 'env_file_path' property.")
+    logger.info("Done: 'extra_dir' property.")
+
+
+def test_env_file_paths(config_loader):
+    logger.info("Testing 'env_file_paths' property...")
+
+    config_loader.env_file_paths = "/tmp/pytest/.env"
+    assert config_loader.env_file_paths == ["/tmp/pytest/.env"]
+
+    with pytest.raises(TypeError):
+        config_loader.env_file_paths = 3.14
+        config_loader.env_file_paths = False
+        config_loader.env_file_paths = None
+
+    with pytest.raises(ValueError):
+        config_loader.env_file_paths = ""
+
+    logger.info("Done: 'env_file_paths' property.")
 
 
 def test_required_envs(config_loader):

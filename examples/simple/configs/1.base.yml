@@ -1,4 +1,4 @@
-env: test
+env: local
 
 app:
   name: "My App"
