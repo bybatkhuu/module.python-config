@@ -493,7 +493,6 @@ logs
 backup
 backups
 archive
-extra_configs
 pythonpath
 *.bak
 *.pyc
@@ -511,5 +510,4 @@ logs/
 backup/
 backups/
 archive/
-extra_configs/
 pythonpath/

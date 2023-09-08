@@ -1,4 +1,4 @@
-env: production
+env: local
 
 app:
   name: "My App"
@@ -8,4 +8,4 @@ app:
   ignore_val: "Ignore me"
 
 logger:
-  output: "stdout"
+  output: "file"

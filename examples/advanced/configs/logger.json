@@ -1,7 +1,6 @@
 {
-	"logger":
-	{
+	"logger": {
 		"level": "info",
-		"output": "file"
+		"output": "stdout"
 	}
 }
