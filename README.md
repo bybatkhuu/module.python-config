@@ -192,7 +192,7 @@ cd ./examples/simple
 python ./main.py
 ```
 
-Output:
+**Output**:
 
 ```txt
 INFO:__main__: App name: New App
@@ -390,7 +390,7 @@ cd ./examples/advanced
 python ./app.py
 ```
 
-Output:
+**Output**:
 
 ```txt
 WARNING:onion_config._base:'/home/user/workspaces/projects/onion_config/examples/advanced/.env' file is not exist!
@@ -446,7 +446,7 @@ Load order:
 3. Load all config files from `configs_dirs` into `config_data`.
 4. Load extra config files from `extra_dir` into `config_data`.
 5. Execute `pre_load_hook` method to modify `config_data`.
-6. Init `config_schema` with `config_data` into final `config`.
+6. Init `config_schema` with `config_data` into final **`config`**.
 
 ## Environment Variables
 

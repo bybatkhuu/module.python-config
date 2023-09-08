@@ -44,7 +44,7 @@ The `ConfigLoader` class is the main class of the `onion_config` package. An ins
 3. Load all config files from `configs_dirs` into `config_data`.
 4. Load extra config files from `extra_dir` into `config_data`.
 5. Execute `pre_load_hook` method to modify `config_data`.
-6. Init `config_schema` with `config_data` into final `config`.
+6. Init `config_schema` with `config_data` into final **`config`**.
 
 ## BaseConfig Class
 
