@@ -14,8 +14,9 @@
 
 - **Main config** based on **Pydantic schema** - <https://pypi.org/project/pydantic>
 - Load **environment variables** - <https://pypi.org/project/python-dotenv>
+- Load from **multiple** configs directories
 - Load configs from **YAML** and **JSON** files
-- Update the default config with additional configurations (**`extra_configs`** directory)
+- Update the default config with additional configurations (**`extra_dir`** directory)
 - **Pre-load hook** function to modify config data before loading and validation
 - **Validate config** values with **Pydantic validators**
 - Config as **dictionary** or **Pydantic model** (with type hints)
