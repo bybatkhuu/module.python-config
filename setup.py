@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from setuptools import setup
+from setuptools import setup, find_packages
 from distutils.util import convert_path
 
 
@@ -14,7 +14,7 @@ _package_version = _namespace_dict["__version__"]
 
 setup(
     name=_package_name,
-    packages=[_package_name],
+    packages=find_packages(),
     version=f"{_package_version}",
     license="MIT",
     description="onion_config is a python package that allows for easy configuration management. It allows for loading and validating configuration data from environment variables and config files in JSON and YAML formats.",
