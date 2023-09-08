@@ -30,8 +30,7 @@ jobs:
           python -m pip install -U pip
           python -m pip install -r ./requirements.test.txt
       - name: Test with pytest
-        run: python -m pytest -sv
-        # run: python -m pytest -sv -o log_cli=true
+        run: ./scripts/test.sh
 
   build_publish:
     needs: test

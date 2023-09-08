@@ -81,15 +81,15 @@ class ConfigLoader:
         Args:
             config_schema  (Union[Type[BaseConfig],
                                   Type[BaseSettings],
-                                  Type[BaseModel]]  , optional): Main config schema class to load and validate configs. Defaults to `BaseConfig`.
-            configs_dirs   (Union[List[str], str]   , optional): Main configs directories as <list> or <str> to load all config files. Defaults to `ConfigLoader._CONFIGS_DIR`.
-            env_file_paths (Union[List[str], str]   , optional): Dotenv file paths as <list> or <str> to load. Defaults to `ConfigLoader._ENV_FILE_PATH`.
-            required_envs  (List[str]               , optional): Required environment variables to check. Defaults to [].
-            pre_load_hook  (function                , optional): Custom pre-load method, this method will executed before validating `config`. Defaults to `ConfigLoader._PRE_LOAD_HOOK`.
-            extra_dir      (Union[str, None]        , optional): Extra configs directory to load extra config files. Defaults to None.
-            config_data    (dict                    , optional): Base config data as <dict> before everything. Defaults to {}.
-            quiet          (bool                    , optional): If False, will show warning messages. Defaults to True.
-            auto_load      (bool                    , optional): Auto load configs on init or not. Defaults to False.
+                                  Type[BaseModel]    ], optional): Main config schema class to load and validate configs. Defaults to `BaseConfig`.
+            configs_dirs   (Union[List[str], str]     , optional): Main configs directories as <list> or <str> to load all config files. Defaults to `ConfigLoader._CONFIGS_DIR`.
+            env_file_paths (Union[List[str], str]     , optional): Dotenv file paths as <list> or <str> to load. Defaults to `ConfigLoader._ENV_FILE_PATH`.
+            required_envs  (List[str]                 , optional): Required environment variables to check. Defaults to [].
+            pre_load_hook  (function                  , optional): Custom pre-load method, this method will executed before validating `config`. Defaults to `ConfigLoader._PRE_LOAD_HOOK`.
+            extra_dir      (Union[str, None]          , optional): Extra configs directory to load extra config files. Defaults to None.
+            config_data    (dict                      , optional): Base config data as <dict> before everything. Defaults to {}.
+            quiet          (bool                      , optional): If False, will show warning messages. Defaults to True.
+            auto_load      (bool                      , optional): Auto load configs on init or not. Defaults to False.
         """
 
         self.config_schema = config_schema
@@ -105,7 +105,6 @@ class ConfigLoader:
         if auto_load:
             self.load()
 
-    @validate_call
     def load(self) -> Union[BaseConfig, BaseSettings, BaseModel]:
         """Load and validate every configs into `config`.
         Load order:
@@ -169,7 +168,7 @@ class ConfigLoader:
             env_file_path = os.path.join(os.getcwd(), env_file_path)
 
         if os.path.isfile(env_file_path):
-            load_dotenv(dotenv_path=env_file_path, override=True, encoding="utf8")
+            load_dotenv(dotenv_path=env_file_path, override=True, encoding="utf-8")
         else:
             if self.quiet:
                 logger.debug(f"'{env_file_path}' file is not exist!")
@@ -242,7 +241,7 @@ class ConfigLoader:
 
         if os.path.isfile(file_path):
             try:
-                with open(file_path, "r", encoding="utf8") as _file:
+                with open(file_path, "r", encoding="utf-8") as _file:
                     _new_config_dict = yaml.safe_load(_file) or {}
                     self.config_data = deep_merge(self.config_data, _new_config_dict)
             except Exception:
@@ -265,7 +264,7 @@ class ConfigLoader:
 
         if os.path.isfile(file_path):
             try:
-                with open(file_path, "r", encoding="utf8") as _file:
+                with open(file_path, "r", encoding="utf-8") as _file:
                     _new_config_dict = json.load(_file) or {}
                     self.config_data = deep_merge(self.config_data, _new_config_dict)
             except Exception:
@@ -290,7 +289,7 @@ class ConfigLoader:
     #         try:
     #             import toml
 
-    #             with open(file_path, "r", encoding="utf8") as _file:
+    #             with open(file_path, "r", encoding="utf-8") as _file:
     #                 _new_config_dict = toml.load(_file) or {}
     #                 self.config_data = deep_merge(self.config_data, _new_config_dict)
     #         except Exception:
@@ -331,7 +330,7 @@ class ConfigLoader:
                 f"`config` attribute type {type(config)} is invalid, must be a <class 'BaseConfig'> or `pydantic` <class 'BaseSettings'> or <class 'BaseModel'>."
             )
 
-        self.__config = config
+        self.__config = copy.deepcopy(config)
 
     ## config ##
 
@@ -450,6 +449,9 @@ class ConfigLoader:
         extra_dir = extra_dir.strip()
         if extra_dir == "":
             raise ValueError("The `extra_dir` attribute value is empty!")
+
+        if not os.path.isabs(extra_dir):
+            extra_dir = os.path.join(os.getcwd(), extra_dir)
 
         self.__extra_dir = extra_dir
 

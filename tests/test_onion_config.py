@@ -68,7 +68,7 @@ def test_init(config_loader):
     assert config_loader.config_data == {}
     assert config_loader.config == None
 
-    logger.info("Done: Initialization of 'ConfigLoader'.")
+    logger.info("Done: Initialization of 'ConfigLoader'.\n")
 
 
 def test_load(config_loader):
@@ -125,7 +125,7 @@ def test_config_load(
     assert isinstance(_config, config_schema)
     assert _config.model_dump() == expected
 
-    logger.info("Done: Main config cases.")
+    logger.info("Done: Main config cases.\n")
 
 
 @pytest.mark.parametrize(
@@ -152,7 +152,7 @@ def test_load_dotenv_files(tmp_path, config_loader, content, expected):
     assert config_loader.env_file_paths == [_tmp_env_path]
     assert os.getenv(_env_var) == expected
 
-    logger.info("Done: '_load_dotenv_files' method.")
+    logger.info("Done: '_load_dotenv_files' method.\n")
 
 
 def test_check_required_envs(config_loader):
@@ -172,7 +172,7 @@ def test_check_required_envs(config_loader):
         config_loader._check_required_envs()
         assert os.getenv(_none_existent_env_var) == None
 
-    logger.info("Done: '_check_required_envs' method.")
+    logger.info("Done: '_check_required_envs' method.\n")
 
 
 def test_load_configs_dirs(config_loader, configs_dir):
@@ -188,7 +188,7 @@ def test_load_configs_dirs(config_loader, configs_dir):
     assert config_loader.config_data["yaml_test"] == True
     assert config_loader.config_data == _expected
 
-    logger.info("Done: '_load_configs_dirs' method.")
+    logger.info("Done: '_load_configs_dirs' method.\n")
 
 
 def test_load_extra_dir(tmp_path, config_loader, configs_dir):
@@ -218,7 +218,7 @@ def test_load_extra_dir(tmp_path, config_loader, configs_dir):
     assert config_loader.config_data["extra_test"] == "extra_value"
     assert config_loader.config_data == _expected
 
-    logger.info("Done: '_load_extra_dir' method.")
+    logger.info("Done: '_load_extra_dir' method.\n")
 
 
 def test_config(config_loader):
@@ -245,7 +245,7 @@ def test_config(config_loader):
         config_loader.config = False
         config_loader.config = None
 
-    logger.info("Done: 'config' property.")
+    logger.info("Done: 'config' property.\n")
 
 
 def test_config_schema(config_loader):
@@ -263,7 +263,7 @@ def test_config_schema(config_loader):
         config_loader.config_schema = False
         config_loader.config_schema = None
 
-    logger.info("Done: 'config_schema' property.")
+    logger.info("Done: 'config_schema' property.\n")
 
 
 def test_config_data(config_loader):
@@ -284,7 +284,7 @@ def test_config_data(config_loader):
         config_loader.config_data = False
         config_loader.config_data = None
 
-    logger.info("Done: 'config_data' property.")
+    logger.info("Done: 'config_data' property.\n")
 
 
 def test_configs_dirs(config_loader):
@@ -301,7 +301,7 @@ def test_configs_dirs(config_loader):
     with pytest.raises(ValueError):
         config_loader.configs_dirs = ""
 
-    logger.info("Done: 'configs_dirs' property.")
+    logger.info("Done: 'configs_dirs' property.\n")
 
 
 def test_extra_dir(config_loader):
@@ -318,7 +318,7 @@ def test_extra_dir(config_loader):
     with pytest.raises(ValueError):
         config_loader.extra_dir = ""
 
-    logger.info("Done: 'extra_dir' property.")
+    logger.info("Done: 'extra_dir' property.\n")
 
 
 def test_env_file_paths(config_loader):
@@ -335,7 +335,7 @@ def test_env_file_paths(config_loader):
     with pytest.raises(ValueError):
         config_loader.env_file_paths = ""
 
-    logger.info("Done: 'env_file_paths' property.")
+    logger.info("Done: 'env_file_paths' property.\n")
 
 
 def test_required_envs(config_loader):
@@ -356,7 +356,7 @@ def test_required_envs(config_loader):
     with pytest.raises(ValueError):
         config_loader.required_envs = ["TEST_ENV_VAR", 1, None]
 
-    logger.info("Done: 'required_envs' property.")
+    logger.info("Done: 'required_envs' property.\n")
 
 
 def test_pre_load_hook(config_loader):
@@ -377,4 +377,4 @@ def test_pre_load_hook(config_loader):
         config_loader.pre_load_hook = False
         config_loader.pre_load_hook = None
 
-    logger.info("Done: 'pre_load_hook' property.")
+    logger.info("Done: 'pre_load_hook' property.\n")
