@@ -453,7 +453,7 @@ Load order:
 You can use the following environment variables inside [**`.env.example`**](https://github.com/bybatkhuu/mod.python-config/blob/main/.env.example) file:
 
 ```sh
-ONION_CONFIG_EXTRA_DIR="./extra_dir"
+ONION_CONFIG_EXTRA_DIR="./extra_configs"
 ```
 
 ## Documentation
