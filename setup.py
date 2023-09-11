@@ -22,8 +22,8 @@ setup(
     long_description_content_type="text/markdown",
     author="Batkhuu Byambajav",
     author_email="batkhuu10@gmail.com",
-    url="https://github.com/bybatkhuu/mod.python-config",
-    download_url=f"https://github.com/bybatkhuu/mod.python-config/archive/v{_package_version}.tar.gz",
+    url="https://github.com/bybatkhuu/module.python-config",
+    download_url=f"https://github.com/bybatkhuu/module.python-config/archive/v{_package_version}.tar.gz",
     keywords=[
         _package_name,
         "config",
