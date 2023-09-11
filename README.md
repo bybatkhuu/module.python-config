@@ -1,8 +1,8 @@
 # onion_config
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/bybatkhuu/mod.python-config/2.build-publish.yml?logo=GitHub)](https://github.com/bybatkhuu/mod.python-config/actions/workflows/2.build-publish.yml)
-[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/bybatkhuu/mod.python-config?logo=GitHub)](https://github.com/bybatkhuu/mod.python-config/releases)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/bybatkhuu/module.python-config/2.build-publish.yml?logo=GitHub)](https://github.com/bybatkhuu/module.python-config/actions/workflows/2.build-publish.yml)
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/bybatkhuu/module.python-config?logo=GitHub)](https://github.com/bybatkhuu/module.python-config/releases)
 [![PyPI](https://img.shields.io/pypi/v/onion-config?logo=PyPi)](https://pypi.org/project/onion-config)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/onion-config?logo=Python)](https://docs.conda.io/en/latest/miniconda.html)
 
@@ -47,12 +47,12 @@ pip install -U onion-config
 
 ```sh
 # Install package by git:
-pip install git+https://github.com/bybatkhuu/mod.python-config.git
+pip install git+https://github.com/bybatkhuu/module.python-config.git
 ```
 
 **C.** Install from **pre-built release** files
 
-1. Download **`.whl`** or **`.tar.gz`** file from **releases** - <https://github.com/bybatkhuu/mod.python-config/releases>
+1. Download **`.whl`** or **`.tar.gz`** file from **releases** - <https://github.com/bybatkhuu/module.python-config/releases>
 2. Install with pip:
 
 ```sh
@@ -66,7 +66,7 @@ pip install ./onion_config-[VERSION].tar.gz
 
 ```sh
 # Clone repository by git:
-git clone https://github.com/bybatkhuu/mod.python-config.git onion_config
+git clone https://github.com/bybatkhuu/module.python-config.git onion_config
 cd ./onion_config
 
 # Install python build tool:
@@ -87,7 +87,7 @@ pip install ./dist/onion_config-${_VERSION}.tar.gz
 
 ```sh
 # Clone repository by git:
-git clone https://github.com/bybatkhuu/mod.python-config.git onion_config
+git clone https://github.com/bybatkhuu/module.python-config.git onion_config
 cd ./onion_config
 
 # Install with editable development mode:
@@ -98,7 +98,7 @@ pip install -e .
 
 ```sh
 # Clone repository by git:
-git clone https://github.com/bybatkhuu/mod.python-config.git onion_config
+git clone https://github.com/bybatkhuu/module.python-config.git onion_config
 cd ./onion_config
 
 # Install python dependencies:
@@ -124,13 +124,13 @@ config: BaseConfig = ConfigLoader(auto_load=True).config
 
 ### **Simple**
 
-[**`.env`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/simple/.env)
+[**`.env`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/simple/.env)
 
 ```sh
 ENV=production
 ```
 
-[**`configs/1.base.yml`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/simple/configs/1.base.yml):
+[**`configs/1.base.yml`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/simple/configs/1.base.yml):
 
 ```yaml
 env: test
@@ -142,7 +142,7 @@ app:
     key: "value"
 ```
 
-[**`configs/2.extra.yml`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/simple/configs/2.extra.yml):
+[**`configs/2.extra.yml`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/simple/configs/2.extra.yml):
 
 ```yaml
 app:
@@ -155,7 +155,7 @@ another_val:
   extra: 1
 ```
 
-[**`main.py`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/simple/main.py)
+[**`main.py`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/simple/main.py)
 
 ```python
 import sys
@@ -184,7 +184,7 @@ if __name__ == "__main__":
     logger.info(f" Config:\n{pprint.pformat(config.model_dump())}\n")
 ```
 
-Run the [**`examples/simple`**](https://github.com/bybatkhuu/mod.python-config/tree/main/examples/simple):
+Run the [**`examples/simple`**](https://github.com/bybatkhuu/module.python-config/tree/main/examples/simple):
 
 ```sh
 cd ./examples/simple
@@ -207,7 +207,7 @@ INFO:__main__: Config:
 
 ### **Advanced**
 
-[**`.env.base`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/.env.base):
+[**`.env.base`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/.env.base):
 
 ```sh
 ENV=development
@@ -216,7 +216,7 @@ APP_NAME="Old App"
 ONION_CONFIG_EXTRA_DIR="extra_configs"
 ```
 
-[**`.env.prod`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/.env.prod):
+[**`.env.prod`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/.env.prod):
 
 ```sh
 ENV=production
@@ -224,7 +224,7 @@ APP_NAME="New App"
 APP_SECRET="my_secret"
 ```
 
-[**`configs/config.yml`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/configs/config.yml):
+[**`configs/config.yml`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/configs/config.yml):
 
 ```yaml
 env: local
@@ -240,7 +240,7 @@ logger:
   output: "file"
 ```
 
-[**`configs/logger.json`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/configs/logger.json):
+[**`configs/logger.json`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/configs/logger.json):
 
 ```json
 {
@@ -251,7 +251,7 @@ logger:
 }
 ```
 
-[**`configs_2/config.yml`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/configs_2/config.yml):
+[**`configs_2/config.yml`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/configs_2/config.yml):
 
 ```yaml
 extra:
@@ -259,7 +259,7 @@ extra:
     key1: 1
 ```
 
-[**`configs_2/config_2.yml`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/configs_2/config_2.yml):
+[**`configs_2/config_2.yml`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/configs_2/config_2.yml):
 
 ```yaml
 extra:
@@ -267,7 +267,7 @@ extra:
     key2: 2
 ```
 
-[**`extra_configs/extra.json`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/extra_configs/extra.json):
+[**`extra_configs/extra.json`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/extra_configs/extra.json):
 
 ```json
 {
@@ -277,7 +277,7 @@ extra:
 }
 ```
 
-[**`logger.py`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/logger.py):
+[**`logger.py`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/logger.py):
 
 ```python
 import sys
@@ -287,7 +287,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger(__name__)
 ```
 
-[**`schema.py`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/schema.py):
+[**`schema.py`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/schema.py):
 
 ```python
 from enum import Enum
@@ -325,7 +325,7 @@ class ConfigSchema(BaseConfig):
     app: AppConfig = Field(...)
 ```
 
-[**`config.py`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/config.py):
+[**`config.py`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/config.py):
 
 ```python
 from onion_config import ConfigLoader
@@ -357,7 +357,7 @@ except Exception:
     exit(2)
 ```
 
-[**`app.py`**](https://github.com/bybatkhuu/mod.python-config/blob/main/examples/advanced/app.py):
+[**`app.py`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/app.py):
 
 ```python
 import pprint
@@ -382,7 +382,7 @@ if __name__ == "__main__":
         logger.error(f" {e}\n")
 ```
 
-Run the [**`examples/advanced`**](https://github.com/bybatkhuu/mod.python-config/tree/main/examples/advanced):
+Run the [**`examples/advanced`**](https://github.com/bybatkhuu/module.python-config/tree/main/examples/advanced):
 
 ```sh
 cd ./examples/advanced
@@ -450,7 +450,7 @@ Load order:
 
 ## Environment Variables
 
-You can use the following environment variables inside [**`.env.example`**](https://github.com/bybatkhuu/mod.python-config/blob/main/.env.example) file:
+You can use the following environment variables inside [**`.env.example`**](https://github.com/bybatkhuu/module.python-config/blob/main/.env.example) file:
 
 ```sh
 ONION_CONFIG_EXTRA_DIR="./extra_configs"
@@ -458,8 +458,8 @@ ONION_CONFIG_EXTRA_DIR="./extra_configs"
 
 ## Documentation
 
-- [docs](https://github.com/bybatkhuu/mod.python-config/blob/main/docs/README.md)
-- [scripts](https://github.com/bybatkhuu/mod.python-config/blob/main/docs/scripts/README.md)
+- [docs](https://github.com/bybatkhuu/module.python-config/blob/main/docs/README.md)
+- [scripts](https://github.com/bybatkhuu/module.python-config/blob/main/docs/scripts/README.md)
 
 ---
 
