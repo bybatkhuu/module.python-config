@@ -170,9 +170,7 @@ class ConfigLoader:
         if os.path.isfile(env_file_path):
             load_dotenv(dotenv_path=env_file_path, override=True, encoding="utf-8")
         else:
-            if self.quiet:
-                logger.debug(f"'{env_file_path}' file is not exist!")
-            else:
+            if not self.quiet:
                 logger.warning(f"'{env_file_path}' file is not exist!")
 
     def _check_required_envs(self):
@@ -223,9 +221,7 @@ class ConfigLoader:
                 # elif _file_path.lower().endswith(".toml"):
                 #     self._load_toml_file(file_path=_file_path)
         else:
-            if self.quiet:
-                logger.debug(f"'{configs_dir}' directory is not exist!")
-            else:
+            if not self.quiet:
                 logger.warning(f"'{configs_dir}' directory is not exist!")
 
     @validate_call
