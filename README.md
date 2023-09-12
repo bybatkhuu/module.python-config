@@ -29,8 +29,8 @@
 
 ### 1. Prerequisites
 
-- **Python (>= v3.7)**
-- **PyPi (>= v21)**
+- **Python (>= v3.8)**
+- **PyPi (>= v23)**
 
 ### 2. Install onion-config package
 
