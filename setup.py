@@ -17,7 +17,7 @@ setup(
     packages=find_packages(),
     version=f"{_package_version}",
     license="MIT",
-    description="onion_config is a python package that allows for easy configuration management. It allows for loading and validating configuration data from environment variables and config files in JSON and YAML formats.",
+    description=f"'{_package_name}' is a python package that allows for easy configuration management. It allows for loading and validating configuration data from environment variables and config files in JSON and YAML formats.",
     long_description=open("README.md", "r").read(),
     long_description_content_type="text/markdown",
     author="Batkhuu Byambajav",
