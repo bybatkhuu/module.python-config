@@ -158,15 +158,11 @@ another_val:
 [**`main.py`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/simple/main.py)
 
 ```python
-import sys
 import pprint
-import logging
+
+from loguru import logger
 
 from onion_config import ConfigLoader, BaseConfig
-
-
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 class ConfigSchema(BaseConfig):
@@ -180,8 +176,8 @@ except Exception:
     exit(2)
 
 if __name__ == "__main__":
-    logger.info(f" App name: {config.app['name']}")
-    logger.info(f" Config:\n{pprint.pformat(config.model_dump())}\n")
+    logger.info(f"App name: {config.app['name']}")
+    logger.info(f"Config:\n{pprint.pformat(config.model_dump())}\n")
 ```
 
 Run the [**`examples/simple`**](https://github.com/bybatkhuu/module.python-config/tree/main/examples/simple):
@@ -195,8 +191,8 @@ python ./main.py
 **Output**:
 
 ```txt
-INFO:__main__: App name: New App
-INFO:__main__: Config:
+2023-09-01 18:23:35.551 | INFO     | __main__:<module>:22 - App name: New App
+2023-09-01 18:23:35.551 | INFO     | __main__:<module>:23 - Config:
 {'another_val': {'extra': 1},
  'app': {'description': 'Description of my app.',
          'name': 'New App',
@@ -277,16 +273,6 @@ extra:
 }
 ```
 
-[**`logger.py`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/logger.py):
-
-```python
-import sys
-import logging
-
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-logger = logging.getLogger(__name__)
-```
-
 [**`schema.py`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/schema.py):
 
 ```python
@@ -328,9 +314,10 @@ class ConfigSchema(BaseConfig):
 [**`config.py`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/config.py):
 
 ```python
+from loguru import logger
+
 from onion_config import ConfigLoader
 
-from logger import logger
 from schema import ConfigSchema
 
 
@@ -348,7 +335,7 @@ try:
         env_file_paths=[".env", ".env.base", ".env.prod"],
         pre_load_hook=_pre_load_hook,
         config_data={"base": "start_value"},
-        quiet=False,
+        warn_mode="LOG",
     )
     # Main config object:
     config: ConfigSchema = _config_loader.load()
@@ -362,24 +349,25 @@ except Exception:
 ```python
 import pprint
 
+from loguru import logger
+
 from config import config
-from logger import logger
 
 
 if __name__ == "__main__":
-    logger.info(f" ENV: {config.env}")
-    logger.info(f" DEBUG: {config.debug}")
-    logger.info(f" Extra: {config.extra_val}")
-    logger.info(f" Logger: {config.logger}")
-    logger.info(f" App: {config.app}")
-    logger.info(f" Secret: '{config.app.secret.get_secret_value()}'\n")
-    logger.info(f" Config:\n{pprint.pformat(config.model_dump())}\n")
+    logger.info(f"ENV: {config.env}")
+    logger.info(f"DEBUG: {config.debug}")
+    logger.info(f"Extra: {config.extra_val}")
+    logger.info(f"Logger: {config.logger}")
+    logger.info(f"App: {config.app}")
+    logger.info(f"Secret: '{config.app.secret.get_secret_value()}'\n")
+    logger.info(f"Config:\n{pprint.pformat(config.model_dump())}\n")
 
     try:
         # This will raise ValidationError
         config.app.port = 8443
     except Exception as e:
-        logger.error(f" {e}\n")
+        logger.error(f"{e}\n")
 ```
 
 Run the [**`examples/advanced`**](https://github.com/bybatkhuu/module.python-config/tree/main/examples/advanced):
@@ -393,16 +381,17 @@ python ./app.py
 **Output**:
 
 ```txt
-WARNING:onion_config._base:'/home/user/workspaces/projects/onion_config/examples/advanced/.env' file is not exist!
-WARNING:onion_config._base:'/not_exists/path/configs_3' directory is not exist!
-INFO:logger: ENV: production
-INFO:logger: DEBUG: True
-INFO:logger: Extra: Something extra!
-INFO:logger: Logger: {'output': 'stdout', 'level': 'info'}
-INFO:logger: App: name='New App' bind_host='0.0.0.0' port=80 secret=SecretStr('**********') version='0.0.1' description=None
-INFO:logger: Secret: 'my_secret'
+2023-09-01 18:25:43.744 | INFO     | onion_config._base:load:129 - Loading all configs...
+2023-09-01 18:25:43.747 | WARNING  | onion_config._base:_load_configs_dir:242 - '/not_exists/path/configs_3' directory is not exist!
+2023-09-01 18:25:43.748 | SUCCESS  | onion_config._base:load:156 - Successfully loaded all configs!
+2023-09-01 18:25:43.748 | INFO     | __main__:<module>:12 - ENV: production
+2023-09-01 18:25:43.748 | INFO     | __main__:<module>:13 - DEBUG: True
+2023-09-01 18:25:43.748 | INFO     | __main__:<module>:14 - Extra: Something extra!
+2023-09-01 18:25:43.748 | INFO     | __main__:<module>:15 - Logger: {'output': 'stdout', 'level': 'info'}
+2023-09-01 18:25:43.748 | INFO     | __main__:<module>:16 - App: name='New App' bind_host='0.0.0.0' port=80 secret=SecretStr('**********') version='0.0.1' description=None
+2023-09-01 18:25:43.748 | INFO     | __main__:<module>:17 - Secret: 'my_secret'
 
-INFO:logger: Config:
+2023-09-01 18:25:43.748 | INFO     | __main__:<module>:18 - Config:
 {'app': {'bind_host': '0.0.0.0',
          'description': None,
          'name': 'New App',
@@ -416,7 +405,7 @@ INFO:logger: Config:
  'extra_val': 'Something extra!',
  'logger': {'level': 'info', 'output': 'stdout'}}
 
-ERROR:logger: 1 validation error for AppConfig
+2023-09-01 18:25:43.748 | ERROR    | __main__:<module>:24 - 1 validation error for AppConfig
 port
   Instance is frozen [type=frozen_instance, input_value=8443, input_type=int]
 ```

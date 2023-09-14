@@ -5,22 +5,20 @@ import os
 import glob
 import json
 import copy
-import logging
-from typing import Union, List, Callable, Type
+from typing import Union, List, Callable, Type, Dict, Any
 
 ## Third-party libraries
 import yaml
 from dotenv import load_dotenv
+from loguru import logger
 from pydantic import BaseModel, validate_call
 from pydantic_settings import BaseSettings
 
 ## Internal modules
+from ._const import WarnEnum
 from ._utils import deep_merge
-from ._schema import BaseConfig
+from ._schemas import BaseConfig
 from .__version__ import __version__
-
-
-logger = logging.getLogger(__name__)
 
 
 class ConfigLoader:
@@ -43,7 +41,7 @@ class ConfigLoader:
         env_file_paths (str                       ): Dotenv file paths as <list> to load. Defaults to [ConfigLoader._ENV_FILE_PATH].
         required_envs  (str                       ): Required environment variables to check. Defaults to [].
         pre_load_hook  (function                  ): Custom pre-load method, this method will executed before validating `config`. Defaults to `ConfigLoader._PRE_LOAD_HOOK`.
-        quiet          (bool                      ): If False, will show warning messages. Defaults to True.
+        warn_mode      (WarnEnum                  ): Warning mode to handle warnings. Defaults to `WarnEnum.IGNORE`.
 
     Methods:
         load()                : Load and validate every configs into `config`.
@@ -72,8 +70,8 @@ class ConfigLoader:
         required_envs: List[str] = [],
         pre_load_hook: Callable = _PRE_LOAD_HOOK,
         extra_dir: Union[str, None] = None,
-        config_data: dict = {},
-        quiet: bool = True,
+        config_data: Dict[str, Any] = {},
+        warn_mode: WarnEnum = WarnEnum.IGNORE,
         auto_load: bool = False,
     ):
         """ConfigLoader constructor method.
@@ -88,7 +86,7 @@ class ConfigLoader:
             pre_load_hook  (function                  , optional): Custom pre-load method, this method will executed before validating `config`. Defaults to `ConfigLoader._PRE_LOAD_HOOK`.
             extra_dir      (Union[str, None]          , optional): Extra configs directory to load extra config files. Defaults to None.
             config_data    (dict                      , optional): Base config data as <dict> before everything. Defaults to {}.
-            quiet          (bool                      , optional): If False, will show warning messages. Defaults to True.
+            warn_mode      (WarnEnum                  , optional): Warning mode to handle warnings. Defaults to `WarnEnum.IGNORE`.
             auto_load      (bool                      , optional): Auto load configs on init or not. Defaults to False.
         """
 
@@ -100,7 +98,7 @@ class ConfigLoader:
         if extra_dir:
             self.extra_dir = extra_dir
         self.config_data = config_data
-        self.quiet = quiet
+        self.warn_mode = warn_mode
 
         if auto_load:
             self.load()
@@ -127,6 +125,12 @@ class ConfigLoader:
             Union[BaseConfig, BaseSettings, BaseModel]: Main config object (based on `config_schema`) for project.
         """
 
+        _message = "Loading all configs..."
+        if self.warn_mode == WarnEnum.LOG:
+            logger.info(_message)
+        elif self.warn_mode == WarnEnum.DEBUG:
+            logger.debug(_message)
+
         self._load_dotenv_files()
         self._check_required_envs()
         self._load_configs_dirs()
@@ -134,7 +138,7 @@ class ConfigLoader:
 
         try:
             # 5. Execute `pre_load_hook` method to modify `config_data`:
-            self.config_data: dict = self.pre_load_hook(self.config_data)
+            self.config_data: Dict[str, Any] = self.pre_load_hook(self.config_data)
         except Exception:
             logger.critical("Failed to execute `pre_load_hook` method:")
             raise
@@ -147,6 +151,12 @@ class ConfigLoader:
         except Exception:
             logger.critical("Failed to init `config_schema`:")
             raise
+
+        _message = "Successfully loaded all configs!"
+        if self.warn_mode == WarnEnum.LOG:
+            logger.success(_message)
+        elif self.warn_mode == WarnEnum.DEBUG:
+            logger.debug(_message)
 
         return self.config
 
@@ -170,8 +180,13 @@ class ConfigLoader:
         if os.path.isfile(env_file_path):
             load_dotenv(dotenv_path=env_file_path, override=True, encoding="utf-8")
         else:
-            if not self.quiet:
-                logger.warning(f"'{env_file_path}' file is not exist!")
+            _message = f"'{env_file_path}' file is not exist!"
+            if self.warn_mode == WarnEnum.RAISE:
+                raise FileNotFoundError(_message)
+            # elif self.warn_mode == WarnEnum.LOG:
+            #     logger.warning(_message)
+            elif self.warn_mode == WarnEnum.DEBUG:
+                logger.debug(_message)
 
     def _check_required_envs(self):
         """2. Check if required environment variables exist or not.
@@ -221,8 +236,13 @@ class ConfigLoader:
                 # elif _file_path.lower().endswith(".toml"):
                 #     self._load_toml_file(file_path=_file_path)
         else:
-            if not self.quiet:
-                logger.warning(f"'{configs_dir}' directory is not exist!")
+            _message = f"'{configs_dir}' directory is not exist!"
+            if self.warn_mode == WarnEnum.RAISE:
+                raise FileNotFoundError(_message)
+            elif self.warn_mode == WarnEnum.LOG:
+                logger.warning(_message)
+            elif self.warn_mode == WarnEnum.DEBUG:
+                logger.debug(_message)
 
     @validate_call
     def _load_yaml_file(self, file_path: str):
@@ -243,9 +263,6 @@ class ConfigLoader:
             except Exception:
                 logger.critical(f"Failed to load '{file_path}' YAML config file:")
                 raise
-        else:
-            if not self.quiet:
-                logger.warning(f"'{file_path}' YAML config file is not exist!")
 
     @validate_call
     def _load_json_file(self, file_path: str):
@@ -266,9 +283,6 @@ class ConfigLoader:
             except Exception:
                 logger.critical(f"Failed to load '{file_path}' JSON config file:")
                 raise
-        else:
-            if not self.quiet:
-                logger.warning(f"'{file_path}' JSON config file is not exist!")
 
     # @validate_call
     # def _load_toml_file(self, file_path: str):
@@ -291,9 +305,6 @@ class ConfigLoader:
     #         except Exception:
     #             logger.critical(f"Failed to load '{file_path}' TOML config file:")
     #             raise
-    #     else:
-    #         if not self.quiet:
-    #             logger.warning(f"'{file_path}' TOML config file is not exist!")
 
     def _load_extra_dir(self):
         """4. Load extra config files from `extra_dir` into `config_data`."""
@@ -373,7 +384,7 @@ class ConfigLoader:
 
     ## config_data ##
     @property
-    def config_data(self) -> dict:
+    def config_data(self) -> Dict[str, Any]:
         try:
             return self.__config_data
         except AttributeError:
@@ -382,7 +393,7 @@ class ConfigLoader:
         return self.__config_data
 
     @config_data.setter
-    def config_data(self, config_data: dict):
+    def config_data(self, config_data: Dict[str, Any]):
         if not isinstance(config_data, dict):
             raise TypeError(
                 f"`config_data` attribute type {type(config_data)} is invalid, must be a <dict>."
@@ -537,22 +548,30 @@ class ConfigLoader:
 
     ## pre_load_hook ##
 
-    ## quiet ##
+    ## warn_mode ##
     @property
-    def quiet(self) -> bool:
+    def warn_mode(self) -> WarnEnum:
         try:
-            return self.__quiet
+            return self.__warn_mode
         except AttributeError:
-            return True
+            return WarnEnum.IGNORE
 
-    @quiet.setter
-    def quiet(self, quiet: bool):
-        if not isinstance(quiet, bool):
+    @warn_mode.setter
+    def warn_mode(self, warn_mode: Union[WarnEnum, str]):
+        if (not isinstance(warn_mode, WarnEnum)) and (not isinstance(warn_mode, str)):
             raise TypeError(
-                f"'quiet' attribute type {type(quiet)} is invalid, must be a <bool>!"
+                f"'warn_mode' attribute type {type(warn_mode)} is invalid, must be a <enum 'WarnEnum'> or <str>!"
             )
 
-        self.__quiet = quiet
+        if isinstance(warn_mode, str):
+            try:
+                warn_mode = WarnEnum(warn_mode)
+            except ValueError:
+                raise ValueError(
+                    f"'warn_mode' attribute value '{warn_mode}' is invalid, must be a <enum 'WarnEnum'> or 'RAISE', 'LOG', 'DEBUG', 'IGNORE'!"
+                )
 
-    ## quiet ##
+        self.__warn_mode = warn_mode
+
+    ## warn_mode ##
     ### ATTRIBUTES ###

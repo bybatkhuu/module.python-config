@@ -2,19 +2,20 @@
 
 import os
 import logging
-from typing import Callable
+from pathlib import Path
+from typing import Callable, Tuple, Dict, Any
 
 import pytest
 from pydantic import Field
 
-from onion_config import ConfigLoader, BaseConfig
+from onion_config import ConfigLoader, BaseConfig, WarnEnum
 
 
 logger = logging.getLogger(__name__)
 
 
 @pytest.fixture
-def config_loader():
+def config_loader() -> ConfigLoader:
     _config_loader = ConfigLoader()
 
     yield _config_loader
@@ -23,7 +24,7 @@ def config_loader():
 
 
 @pytest.fixture
-def configs_dir(tmp_path):
+def configs_dir(tmp_path: Path) -> Tuple[str, Dict[str, Any]]:
     _tmp_configs_dir_pl = tmp_path / "configs"
     _tmp_configs_dir_pl.mkdir()
     _tmp_json_file_pl = (_tmp_configs_dir_pl / "test.json").resolve()
@@ -49,7 +50,7 @@ def configs_dir(tmp_path):
     )
 
 
-def test_init(config_loader):
+def test_init(config_loader: ConfigLoader):
     logger.info("Testing initialization of 'ConfigLoader'...")
 
     assert isinstance(config_loader, ConfigLoader)
@@ -66,12 +67,14 @@ def test_init(config_loader):
     assert config_loader.extra_dir == None
     assert isinstance(config_loader.config_data, dict)
     assert config_loader.config_data == {}
+    assert isinstance(config_loader.warn_mode, WarnEnum)
+    assert config_loader.warn_mode == WarnEnum.IGNORE
     assert config_loader.config == None
 
     logger.info("Done: Initialization of 'ConfigLoader'.\n")
 
 
-def test_load(config_loader):
+def test_load(config_loader: ConfigLoader):
     logger.info("Testing 'load' method...")
 
     _config: BaseConfig = config_loader.load()
@@ -83,7 +86,7 @@ def test_load(config_loader):
 
 
 @pytest.mark.parametrize(
-    "config_schema, configs_dirs, env_file_paths, required_envs, pre_load_hook, extra_dir, config_data, quiet, expected",
+    "config_schema, configs_dirs, env_file_paths, required_envs, pre_load_hook, extra_dir, config_data, warn_mode, expected",
     [
         (
             BaseConfig,
@@ -93,7 +96,7 @@ def test_load(config_loader):
             lambda config_data: config_data,
             None,
             {},
-            True,
+            "IGNORE",
             {},
         )
     ],
@@ -106,7 +109,7 @@ def test_config_load(
     pre_load_hook,
     extra_dir,
     config_data,
-    quiet,
+    warn_mode,
     expected,
 ):
     logger.info("Testing main config cases...")
@@ -119,7 +122,7 @@ def test_config_load(
         pre_load_hook=pre_load_hook,
         extra_dir=extra_dir,
         config_data=config_data,
-        quiet=quiet,
+        warn_mode=warn_mode,
     ).load()
 
     assert isinstance(_config, config_schema)
@@ -136,7 +139,9 @@ def test_config_load(
         ("TEST_ENV_VAR=123", "123"),
     ],
 )
-def test_load_dotenv_files(tmp_path, config_loader, content, expected):
+def test_load_dotenv_files(
+    tmp_path: Path, config_loader: ConfigLoader, content: str, expected: str
+):
     logger.info("Testing '_load_dotenv_files' method...")
 
     _tmp_envs_dir_pl = tmp_path / "envs"
@@ -155,7 +160,7 @@ def test_load_dotenv_files(tmp_path, config_loader, content, expected):
     logger.info("Done: '_load_dotenv_files' method.\n")
 
 
-def test_check_required_envs(config_loader):
+def test_check_required_envs(config_loader: ConfigLoader):
     logger.info("Testing '_check_required_envs' method...")
 
     os.environ["REQUIRED_ENV_VAR"] = "required_value"
@@ -175,7 +180,9 @@ def test_check_required_envs(config_loader):
     logger.info("Done: '_check_required_envs' method.\n")
 
 
-def test_load_configs_dirs(config_loader, configs_dir):
+def test_load_configs_dirs(
+    config_loader: ConfigLoader, configs_dir: Tuple[str, Dict[str, Any]]
+):
     logger.info("Testing '_load_configs_dirs' method...")
 
     _configs_dir, _expected = configs_dir
@@ -191,7 +198,9 @@ def test_load_configs_dirs(config_loader, configs_dir):
     logger.info("Done: '_load_configs_dirs' method.\n")
 
 
-def test_load_extra_dir(tmp_path, config_loader, configs_dir):
+def test_load_extra_dir(
+    tmp_path, config_loader: ConfigLoader, configs_dir: Tuple[str, Dict[str, Any]]
+):
     logger.info("Testing '_load_extra_dir' method...")
 
     _configs_dir, _expected = configs_dir
@@ -221,7 +230,7 @@ def test_load_extra_dir(tmp_path, config_loader, configs_dir):
     logger.info("Done: '_load_extra_dir' method.\n")
 
 
-def test_config(config_loader):
+def test_config(config_loader: ConfigLoader):
     logger.info("Testing 'config' property...")
 
     class _ConfigSchema(BaseConfig):
@@ -248,7 +257,7 @@ def test_config(config_loader):
     logger.info("Done: 'config' property.\n")
 
 
-def test_config_schema(config_loader):
+def test_config_schema(config_loader: ConfigLoader):
     logger.info("Testing 'config_schema' property...")
 
     class _ConfigSchema(BaseConfig):
@@ -266,7 +275,7 @@ def test_config_schema(config_loader):
     logger.info("Done: 'config_schema' property.\n")
 
 
-def test_config_data(config_loader):
+def test_config_data(config_loader: ConfigLoader):
     logger.info("Testing 'config_data' property...")
 
     _config_data = {"test_var": "test_val"}
@@ -287,7 +296,7 @@ def test_config_data(config_loader):
     logger.info("Done: 'config_data' property.\n")
 
 
-def test_configs_dirs(config_loader):
+def test_configs_dirs(config_loader: ConfigLoader):
     logger.info("Testing 'configs_dirs' property...")
 
     config_loader.configs_dirs = "/tmp/pytest/configs_dir"
@@ -304,7 +313,7 @@ def test_configs_dirs(config_loader):
     logger.info("Done: 'configs_dirs' property.\n")
 
 
-def test_extra_dir(config_loader):
+def test_extra_dir(config_loader: ConfigLoader):
     logger.info("Testing 'extra_dir' property...")
 
     config_loader.extra_dir = "/tmp/pytest/extra_dir"
@@ -321,7 +330,7 @@ def test_extra_dir(config_loader):
     logger.info("Done: 'extra_dir' property.\n")
 
 
-def test_env_file_paths(config_loader):
+def test_env_file_paths(config_loader: ConfigLoader):
     logger.info("Testing 'env_file_paths' property...")
 
     config_loader.env_file_paths = "/tmp/pytest/.env"
@@ -338,7 +347,7 @@ def test_env_file_paths(config_loader):
     logger.info("Done: 'env_file_paths' property.\n")
 
 
-def test_required_envs(config_loader):
+def test_required_envs(config_loader: ConfigLoader):
     logger.info("Testing 'required_envs' property...")
 
     config_loader.required_envs = ["TEST_ENV_VAR"]
@@ -359,7 +368,7 @@ def test_required_envs(config_loader):
     logger.info("Done: 'required_envs' property.\n")
 
 
-def test_pre_load_hook(config_loader):
+def test_pre_load_hook(config_loader: ConfigLoader):
     logger.info("Testing 'pre_load_hook' property...")
 
     def _pre_load_hook(config_data):
