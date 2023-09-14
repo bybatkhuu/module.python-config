@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from loguru import logger
+
 from onion_config import ConfigLoader
 
-from logger import logger
 from schema import ConfigSchema
 
 
@@ -12,6 +13,7 @@ def _pre_load_hook(config_data: dict) -> dict:
     config_data["extra_val"] = "Something extra!"
     return config_data
 
+
 config = None
 try:
     _config_loader = ConfigLoader(
@@ -20,7 +22,7 @@ try:
         env_file_paths=[".env", ".env.base", ".env.prod"],
         pre_load_hook=_pre_load_hook,
         config_data={"base": "start_value"},
-        quiet=False,
+        warn_mode="LOG",
     )
     # Main config object:
     config: ConfigSchema = _config_loader.load()
