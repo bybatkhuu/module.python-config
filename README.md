@@ -40,14 +40,22 @@ Choose one of the following methods to install the package **[A ~ F]**:
 
 ```sh
 # Install or upgrade package:
-pip install -U onion-config
+# Pydantic-v1:
+pip install -U onion-config[pydantic-v1]
+
+# Pydantic-v2:
+pip install -U onion-config[pydantic-settings]
 ```
 
 **B.** Install latest version from **GitHub**
 
 ```sh
 # Install package by git:
-pip install git+https://github.com/bybatkhuu/module.python-config.git
+# Pydantic-v1:
+pip install git+https://github.com/bybatkhuu/module.python-config.git[pydantic-v1]
+
+# Pydantic-v2:
+pip install git+https://github.com/bybatkhuu/module.python-config.git[pydantic-settings]
 ```
 
 **C.** Install from **pre-built release** files
@@ -56,10 +64,17 @@ pip install git+https://github.com/bybatkhuu/module.python-config.git
 2. Install with pip:
 
 ```sh
+# Pydantic-v1:
 # Install from .whl file:
-pip install ./onion_config-[VERSION]-py3-none-any.whl
+pip install ./onion_config-[VERSION]-py3-none-any.whl[pydantic-v1]
 # Or install from .tar.gz file:
-pip install ./onion_config-[VERSION].tar.gz
+pip install ./onion_config-[VERSION].tar.gz[pydantic-v1]
+
+# Pydantic-v2:
+# Install from .whl file:
+pip install ./onion_config-[VERSION]-py3-none-any.whl[pydantic-settings]
+# Or install from .tar.gz file:
+pip install ./onion_config-[VERSION].tar.gz[pydantic-settings]
 ```
 
 **D.** Install from **source code** by building package
@@ -77,10 +92,17 @@ python -m build
 
 _VERSION=$(./scripts/get-version.sh)
 
+# Pydantic-v1:
 # Install from .whl file:
-pip install ./dist/onion_config-${_VERSION}-py3-none-any.whl
+pip install ./dist/onion_config-${_VERSION}-py3-none-any.whl[pydantic-v1]
 # Or install from .tar.gz file:
-pip install ./dist/onion_config-${_VERSION}.tar.gz
+pip install ./dist/onion_config-${_VERSION}.tar.gz[pydantic-v1]
+
+# Pydantic-v2:
+# Install from .whl file:
+pip install ./dist/onion_config-${_VERSION}-py3-none-any.whl[pydantic-settings]
+# Or install from .tar.gz file:
+pip install ./dist/onion_config-${_VERSION}.tar.gz[pydantic-settings]
 ```
 
 **E.** Install with pip editable **development mode** (from source code)
@@ -91,7 +113,11 @@ git clone https://github.com/bybatkhuu/module.python-config.git onion_config
 cd ./onion_config
 
 # Install with editable development mode:
-pip install -e .
+# Pydantic-v1:
+pip install -e .[pydantic-v1]
+
+# Pydantic-v2:
+pip install -e .[pydantic-settings]
 ```
 
 **F.** Manually add to **PYTHONPATH** (not recommended)
@@ -102,7 +128,11 @@ git clone https://github.com/bybatkhuu/module.python-config.git onion_config
 cd ./onion_config
 
 # Install python dependencies:
+# Pydantic-v1:
 pip install -r ./requirements.txt
+
+# Pydantic-v2:
+pip install -r ./requirements.pydantic-v2.txt
 
 # Add current path to PYTHONPATH:
 export PYTHONPATH="${PWD}:${PYTHONPATH}"
@@ -161,13 +191,18 @@ another_val:
 import pprint
 
 from loguru import logger
+try:
+    import pydantic_settings
+
+    _has_pydantic_settings = True
+except ImportError:
+    _has_pydantic_settings = False
 
 from onion_config import ConfigLoader, BaseConfig
 
 
 class ConfigSchema(BaseConfig):
     env: str = "local"
-
 
 try:
     config: ConfigSchema = ConfigLoader(config_schema=ConfigSchema).load()
@@ -176,8 +211,15 @@ except Exception:
     exit(2)
 
 if __name__ == "__main__":
+    logger.info(f"All: {config}")
     logger.info(f"App name: {config.app['name']}")
-    logger.info(f"Config:\n{pprint.pformat(config.model_dump())}\n")
+
+    if _has_pydantic_settings:
+        # Pydantic-v2:
+        logger.info(f"Config:\n{pprint.pformat(config.model_dump())}\n")
+    else:
+        # Pydantic-v1:
+        logger.info(f"Config:\n{pprint.pformat(config.dict())}\n")
 ```
 
 Run the [**`examples/simple`**](https://github.com/bybatkhuu/module.python-config/tree/main/examples/simple):
@@ -191,8 +233,9 @@ python ./main.py
 **Output**:
 
 ```txt
-2023-09-01 18:23:35.551 | INFO     | __main__:<module>:22 - App name: New App
-2023-09-01 18:23:35.551 | INFO     | __main__:<module>:23 - Config:
+2023-09-01 00:00:00.000 | INFO     | __main__:<module>:29 - All: env='production' another_val={'extra': 1} app={'name': 'New App', 'version': '0.0.1', 'nested': {'key': 'value', 'some': 'value'}, 'description': 'Description of my app.'}
+2023-09-01 00:00:00.000 | INFO     | __main__:<module>:30 - App name: New App
+2023-09-01 00:00:00.000 | INFO     | __main__:<module>:35 - Config:
 {'another_val': {'extra': 1},
  'app': {'description': 'Description of my app.',
          'name': 'New App',
@@ -279,8 +322,16 @@ extra:
 from enum import Enum
 from typing import Union
 
+import pydantic
 from pydantic import Field, SecretStr
-from pydantic_settings import SettingsConfigDict
+_has_pydantic_settings = False
+if "2.0.0" <= pydantic.__version__:
+    try:
+        from pydantic_settings import SettingsConfigDict
+
+        _has_pydantic_settings = True
+    except ImportError:
+        pass
 
 from onion_config import BaseConfig
 
@@ -290,6 +341,7 @@ class EnvEnum(str, Enum):
     LOCAL = "local"
     DEVELOPMENT = "development"
     TEST = "test"
+    DEMO = "demo"
     STAGING = "staging"
     PRODUCTION = "production"
 
@@ -302,7 +354,14 @@ class AppConfig(BaseConfig):
     version: str = Field(..., min_length=5, max_length=16)
     description: Union[str, None] = Field(None, min_length=4, max_length=64)
 
-    model_config = SettingsConfigDict(extra="ignore", env_prefix="APP_")
+    if _has_pydantic_settings:
+        # Pydantic-v2:
+        model_config = SettingsConfigDict(extra="ignore", env_prefix="APP_")
+    else:
+        # Pydantic-v1:
+        class Config:
+            extra = "ignore"
+            env_prefix = "APP_"
 
 # Main config schema:
 class ConfigSchema(BaseConfig):
@@ -335,33 +394,46 @@ try:
         env_file_paths=[".env", ".env.base", ".env.prod"],
         pre_load_hook=_pre_load_hook,
         config_data={"base": "start_value"},
-        warn_mode="LOG",
+        warn_mode="ALWAYS",
     )
     # Main config object:
     config: ConfigSchema = _config_loader.load()
 except Exception:
     logger.exception("Failed to load config:")
     exit(2)
+
 ```
 
-[**`app.py`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/app.py):
+[**`main.py`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/main.py):
 
 ```python
 import pprint
 
 from loguru import logger
+try:
+    import pydantic_settings
+    _has_pydantic_settings = True
+except ImportError:
+    _has_pydantic_settings = False
 
 from config import config
 
 
 if __name__ == "__main__":
+    logger.info(f"All: {config}")
     logger.info(f"ENV: {config.env}")
     logger.info(f"DEBUG: {config.debug}")
     logger.info(f"Extra: {config.extra_val}")
     logger.info(f"Logger: {config.logger}")
     logger.info(f"App: {config.app}")
     logger.info(f"Secret: '{config.app.secret.get_secret_value()}'\n")
-    logger.info(f"Config:\n{pprint.pformat(config.model_dump())}\n")
+
+    if _has_pydantic_settings:
+        # Pydantic-v2:
+        logger.info(f"Config:\n{pprint.pformat(config.model_dump())}\n")
+    else:
+        # Pydantic-v1:
+        logger.info(f"Config:\n{pprint.pformat(config.dict())}\n")
 
     try:
         # This will raise ValidationError
@@ -375,23 +447,25 @@ Run the [**`examples/advanced`**](https://github.com/bybatkhuu/module.python-con
 ```sh
 cd ./examples/advanced
 
-python ./app.py
+python ./main.py
 ```
 
 **Output**:
 
 ```txt
-2023-09-01 18:25:43.744 | INFO     | onion_config._base:load:129 - Loading all configs...
-2023-09-01 18:25:43.747 | WARNING  | onion_config._base:_load_configs_dir:242 - '/not_exists/path/configs_3' directory is not exist!
-2023-09-01 18:25:43.748 | SUCCESS  | onion_config._base:load:156 - Successfully loaded all configs!
-2023-09-01 18:25:43.748 | INFO     | __main__:<module>:12 - ENV: production
-2023-09-01 18:25:43.748 | INFO     | __main__:<module>:13 - DEBUG: True
-2023-09-01 18:25:43.748 | INFO     | __main__:<module>:14 - Extra: Something extra!
-2023-09-01 18:25:43.748 | INFO     | __main__:<module>:15 - Logger: {'output': 'stdout', 'level': 'info'}
-2023-09-01 18:25:43.748 | INFO     | __main__:<module>:16 - App: name='New App' bind_host='0.0.0.0' port=80 secret=SecretStr('**********') version='0.0.1' description=None
-2023-09-01 18:25:43.748 | INFO     | __main__:<module>:17 - Secret: 'my_secret'
+2023-09-01 00:00:00.000 | INFO     | onion_config._base:load:143 - Loading all configs...
+2023-09-01 00:00:00.000 | WARNING  | onion_config._base:_load_dotenv_file:201 - '/home/user/workspaces/projects/onion_config/examples/advanced/.env' file is not exist!
+2023-09-01 00:00:00.000 | WARNING  | onion_config._base:_load_configs_dir:257 - '/not_exists/path/configs_3' directory is not exist!
+2023-09-01 00:00:00.000 | SUCCESS  | onion_config._base:load:171 - Successfully loaded all configs!
+2023-09-01 00:00:00.000 | INFO     | __main__:<module>:19 - All: env=<EnvEnum.PRODUCTION: 'production'> debug=True app=AppConfig(name='New App', bind_host='0.0.0.0', port=80, secret=SecretStr('**********'), version='0.0.1', description=None) extra={'config': {'key1': 1, 'key2': 2}, 'type': 'json'} extra_val='Something extra!' logger={'output': 'stdout', 'level': 'info'} base='start_value'
+2023-09-01 00:00:00.000 | INFO     | __main__:<module>:20 - ENV: production
+2023-09-01 00:00:00.000 | INFO     | __main__:<module>:21 - DEBUG: True
+2023-09-01 00:00:00.000 | INFO     | __main__:<module>:22 - Extra: Something extra!
+2023-09-01 00:00:00.000 | INFO     | __main__:<module>:23 - Logger: {'output': 'stdout', 'level': 'info'}
+2023-09-01 00:00:00.000 | INFO     | __main__:<module>:24 - App: name='New App' bind_host='0.0.0.0' port=80 secret=SecretStr('**********') version='0.0.1' description=None
+2023-09-01 00:00:00.000 | INFO     | __main__:<module>:25 - Secret: 'my_secret'
 
-2023-09-01 18:25:43.748 | INFO     | __main__:<module>:18 - Config:
+2023-09-01 00:00:00.000 | INFO     | __main__:<module>:30 - Config:
 {'app': {'bind_host': '0.0.0.0',
          'description': None,
          'name': 'New App',
@@ -405,9 +479,7 @@ python ./app.py
  'extra_val': 'Something extra!',
  'logger': {'level': 'info', 'output': 'stdout'}}
 
-2023-09-01 18:25:43.748 | ERROR    | __main__:<module>:24 - 1 validation error for AppConfig
-port
-  Instance is frozen [type=frozen_instance, input_value=8443, input_type=int]
+2023-09-01 00:00:00.000 | ERROR    | __main__:<module>:36 - "AppConfig" is immutable and does not support item assignment
 ```
 
 ---
@@ -417,6 +489,12 @@ port
 To run tests, run the following command:
 
 ```sh
+# Pydantic-v1:
+pip install -r ./requirements.txt
+
+# Pydantic-v2:
+pip install -r ./requirements.pydantic-v2.txt
+
 # Install python test dependencies:
 pip install -r ./requirements.test.txt
 

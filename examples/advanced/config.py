@@ -22,7 +22,7 @@ try:
         env_file_paths=[".env", ".env.base", ".env.prod"],
         pre_load_hook=_pre_load_hook,
         config_data={"base": "start_value"},
-        warn_mode="LOG",
+        warn_mode="ALWAYS",
     )
     # Main config object:
     config: ConfigSchema = _config_loader.load()

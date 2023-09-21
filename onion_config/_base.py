@@ -11,11 +11,24 @@ from typing import Union, List, Callable, Type, Dict, Any
 import yaml
 from dotenv import load_dotenv
 from loguru import logger
-from pydantic import BaseModel, validate_call
-from pydantic_settings import BaseSettings
+
+import pydantic
+from pydantic import BaseModel
+
+if "2.0.0" <= pydantic.__version__:
+    from pydantic import validate_call
+
+    try:
+        from pydantic_settings import BaseSettings
+    except ImportError:
+        from pydantic.v1 import BaseSettings
+else:
+    from pydantic import BaseSettings
+    from pydantic import validate_arguments as validate_call
+
 
 ## Internal modules
-from ._const import WarnEnum
+from ._consts import WarnEnum
 from ._utils import deep_merge
 from ._schemas import BaseConfig
 from .__version__ import __version__
@@ -126,7 +139,7 @@ class ConfigLoader:
         """
 
         _message = "Loading all configs..."
-        if self.warn_mode == WarnEnum.LOG:
+        if self.warn_mode == WarnEnum.ALWAYS:
             logger.info(_message)
         elif self.warn_mode == WarnEnum.DEBUG:
             logger.debug(_message)
@@ -145,6 +158,7 @@ class ConfigLoader:
 
         try:
             # 6. Init `config_schema` with `config_data` into final `config`:
+
             self.config: Union[
                 BaseConfig, BaseSettings, BaseModel
             ] = self.config_schema(**self.config_data)
@@ -153,7 +167,7 @@ class ConfigLoader:
             raise
 
         _message = "Successfully loaded all configs!"
-        if self.warn_mode == WarnEnum.LOG:
+        if self.warn_mode == WarnEnum.ALWAYS:
             logger.success(_message)
         elif self.warn_mode == WarnEnum.DEBUG:
             logger.debug(_message)
@@ -181,10 +195,10 @@ class ConfigLoader:
             load_dotenv(dotenv_path=env_file_path, override=True, encoding="utf-8")
         else:
             _message = f"'{env_file_path}' file is not exist!"
-            if self.warn_mode == WarnEnum.RAISE:
+            if self.warn_mode == WarnEnum.ERROR:
                 raise FileNotFoundError(_message)
-            # elif self.warn_mode == WarnEnum.LOG:
-            #     logger.warning(_message)
+            elif self.warn_mode == WarnEnum.ALWAYS:
+                logger.warning(_message)
             elif self.warn_mode == WarnEnum.DEBUG:
                 logger.debug(_message)
 
@@ -237,9 +251,9 @@ class ConfigLoader:
                 #     self._load_toml_file(file_path=_file_path)
         else:
             _message = f"'{configs_dir}' directory is not exist!"
-            if self.warn_mode == WarnEnum.RAISE:
+            if self.warn_mode == WarnEnum.ERROR:
                 raise FileNotFoundError(_message)
-            elif self.warn_mode == WarnEnum.LOG:
+            elif self.warn_mode == WarnEnum.ALWAYS:
                 logger.warning(_message)
             elif self.warn_mode == WarnEnum.DEBUG:
                 logger.debug(_message)
@@ -568,7 +582,7 @@ class ConfigLoader:
                 warn_mode = WarnEnum(warn_mode)
             except ValueError:
                 raise ValueError(
-                    f"'warn_mode' attribute value '{warn_mode}' is invalid, must be a <enum 'WarnEnum'> or 'RAISE', 'LOG', 'DEBUG', 'IGNORE'!"
+                    f"'warn_mode' attribute value '{warn_mode}' is invalid, must be a <enum 'WarnEnum'> or 'ERROR', 'ALWAYS', 'DEBUG', 'IGNORE'!"
                 )
 
         self.__warn_mode = warn_mode
