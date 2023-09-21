@@ -34,7 +34,7 @@
 
 ### 2. Install onion-config package
 
-> [!WARNING]
+> [!WARNING] <br>
 > If you wanted to use **Pydantic-v1**, but if you already installed `pydantic-settings` and `pydantic-core`, remove it before installing **Pydantic-v1**:
 
 ```sh
@@ -45,9 +45,9 @@ pip uninstall -y pydantic-core
 pip install -U onion-config[pydantic-v1]
 ```
 
-> [!WARNING]
-> If you wanted to use **Pydantic-v2**, but if you already installed `onion-config` package just by '**`pip install -U onion-config`**' command, and this didn't install `pydantic-settings`.
-> For this case, '**`env_prefix`**' **WILL NOT WORK** for `BaseConfig` or `BaseSettings` without `pydantic-settings`! This is Pydantic-v2's problem, and there could be some other problems.
+> [!WARNING] <br>
+> If you wanted to use **Pydantic-v2**, but if you already installed `onion-config` package just by '**`pip install -U onion-config`**' command, and this didn't install `pydantic-settings`. \
+> For this case, '**`env_prefix`**' **WILL NOT WORK** for `BaseConfig` or `BaseSettings` without `pydantic-settings`! This is Pydantic-v2's problem, and there could be some other problems. \
 > So fix these issues re-install `onion-config` with `pydantic-settings`:
 
 ```sh
