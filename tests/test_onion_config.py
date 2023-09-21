@@ -6,7 +6,17 @@ from pathlib import Path
 from typing import Callable, Tuple, Dict, Any
 
 import pytest
+import pydantic
 from pydantic import Field
+
+_has_pydantic_settings = False
+if "2.0.0" <= pydantic.__version__:
+    try:
+        import pydantic_settings
+
+        _has_pydantic_settings = True
+    except ImportError:
+        pass
 
 from onion_config import ConfigLoader, BaseConfig, WarnEnum
 
@@ -126,7 +136,10 @@ def test_config_load(
     ).load()
 
     assert isinstance(_config, config_schema)
-    assert _config.model_dump() == expected
+    if _has_pydantic_settings:
+        assert _config.model_dump() == expected
+    else:
+        assert _config.dict() == expected
 
     logger.info("Done: Main config cases.\n")
 
@@ -241,11 +254,17 @@ def test_config(config_loader: ConfigLoader):
 
     assert isinstance(config_loader.config, _ConfigSchema)
     assert config_loader.config.test_var == "default_val"
-    assert config_loader.config.model_dump() == {"test_var": "default_val"}
+    if _has_pydantic_settings:
+        assert config_loader.config.model_dump() == {"test_var": "default_val"}
+    else:
+        assert config_loader.config.dict() == {"test_var": "default_val"}
 
     config_loader.config = _ConfigSchema(test_var="new_val")
     assert config_loader.config.test_var == "new_val"
-    assert config_loader.config.model_dump() == {"test_var": "new_val"}
+    if _has_pydantic_settings:
+        assert config_loader.config.model_dump() == {"test_var": "new_val"}
+    else:
+        assert config_loader.config.dict() == {"test_var": "new_val"}
 
     with pytest.raises(TypeError):
         config_loader.config = {"test_var": "invalid_val"}

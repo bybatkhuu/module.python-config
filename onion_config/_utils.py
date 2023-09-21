@@ -2,7 +2,12 @@
 
 import copy
 
-from pydantic import validate_call
+import pydantic
+
+if "2.0.0" <= pydantic.__version__:
+    from pydantic import validate_call
+else:
+    from pydantic import validate_arguments as validate_call
 
 
 @validate_call

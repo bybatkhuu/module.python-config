@@ -3,8 +3,17 @@
 from enum import Enum
 from typing import Union
 
+import pydantic
 from pydantic import Field, SecretStr
-from pydantic_settings import SettingsConfigDict
+
+_has_pydantic_settings = False
+if "2.0.0" <= pydantic.__version__:
+    try:
+        from pydantic_settings import SettingsConfigDict
+
+        _has_pydantic_settings = True
+    except ImportError:
+        pass
 
 from onion_config import BaseConfig
 
@@ -14,6 +23,7 @@ class EnvEnum(str, Enum):
     LOCAL = "local"
     DEVELOPMENT = "development"
     TEST = "test"
+    DEMO = "demo"
     STAGING = "staging"
     PRODUCTION = "production"
 
@@ -27,7 +37,13 @@ class AppConfig(BaseConfig):
     version: str = Field(..., min_length=5, max_length=16)
     description: Union[str, None] = Field(None, min_length=4, max_length=64)
 
-    model_config = SettingsConfigDict(extra="ignore", env_prefix="APP_")
+    if _has_pydantic_settings:
+        model_config = SettingsConfigDict(extra="ignore", env_prefix="APP_")
+    else:
+
+        class Config:
+            extra = "ignore"
+            env_prefix = "APP_"
 
 
 # Main config schema:
