@@ -519,9 +519,11 @@ ONION_CONFIG_EXTRA_DIR="./extra_configs"
 To run tests, run the following command:
 
 ```sh
+# Install core dependencies:
+pip install -r ./requirements/requirements.core.txt
+
 # Pydantic-v1:
 pip install -r ./requirements/requirements.pydantic-v1.txt
-
 # Pydantic-v2:
 pip install -r ./requirements/requirements.pydantic-settings.txt
 

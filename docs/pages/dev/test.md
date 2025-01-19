@@ -3,8 +3,16 @@
 To run tests, run the following command:
 
 ```sh
+# Install core dependencies:
+pip install -r ./requirements/requirements.core.txt
+
+# Pydantic-v1:
+pip install -r ./requirements/requirements.pydantic-v1.txt
+# Pydantic-v2:
+pip install -r ./requirements/requirements.pydantic-settings.txt
+
 # Install python test dependencies:
-pip install -r ./requirements/requirements.test.txt
+pip install -r ./requirements.test.txt
 
 # Run tests:
 python -m pytest -sv -o log_cli=true
