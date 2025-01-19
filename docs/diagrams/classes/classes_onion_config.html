@@ -1,0 +1,37 @@
+<html>
+  <body>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+      <div class="mermaid">
+    
+        classDiagram
+          class BaseConfig {
+            model_config : SettingsConfigDict
+            settings_customise_sources(settings_cls: Type[BaseSettings], init_settings: PydanticBaseSettingsSource, env_settings: PydanticBaseSettingsSource, dotenv_settings: PydanticBaseSettingsSource, file_secret_settings: PydanticBaseSettingsSource) Tuple[PydanticBaseSettingsSource, ...]
+          }
+          class Config {
+            arbitrary_types_allowed : bool
+            extra : str
+            frozen : bool
+            customise_sources(init_settings: SettingsSourceCallable, env_settings: SettingsSourceCallable, file_secret_settings: SettingsSourceCallable) tuple[SettingsSourceCallable, ...]
+          }
+          class ConfigLoader {
+            config
+            config_data
+            config_schema
+            configs_dirs
+            env_file_paths
+            extra_dir
+            pre_load_hook
+            required_envs
+            warn_mode
+            load() Union[BaseConfig, BaseSettings, BaseModel]
+          }
+          class WarnEnum {
+            name
+          }
+          WarnEnum --o ConfigLoader : warn_mode
+          BaseConfig --o ConfigLoader : __config_schema
+  
+       </div>
+  </body>
+</html>

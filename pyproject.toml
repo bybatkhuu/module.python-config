@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=70.3.0,<80.0.0", "setuptools-scm>=8.0.4,<9.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "onion_config"
+authors = [{ name = "Batkhuu Byambajav", email = "batkhuu10@gmail.com" }]
+description = "`onion_config` is a Python package designed for easy configuration management. It supports loading and validating configuration data from environment variables and configuration files in JSON and YAML formats. It is a `Pydantic` based custom configuration package for Python projects."
+readme = "README.md"
+requires-python = ">=3.9,<4.0"
+keywords = [
+	"onion_config",
+	"config",
+	"configs",
+	"dotenv",
+	"python-dotenv",
+	"pydantic",
+	"pydantic-config",
+	"pydantic-settings",
+	"custom-config",
+]
+license = { file = "LICENSE.txt" }
+classifiers = [
+	"Development Status :: 4 - Beta",
+	"Intended Audience :: Developers",
+	"Topic :: Software Development :: Libraries",
+	"License :: OSI Approved :: MIT License",
+	"Operating System :: OS Independent",
+	"Programming Language :: Python :: 3",
+	"Programming Language :: Python :: 3.9",
+	"Programming Language :: Python :: 3.10",
+	"Programming Language :: Python :: 3.11",
+	"Programming Language :: Python :: 3.12",
+	"Programming Language :: Python :: 3.13",
+]
+dynamic = ["version", "dependencies", "optional-dependencies"]
+
+# [tool.setuptools.packages.find]
+# where = ["src"]
+# include = ["onion_config*"]
+# namespaces = false
+
+[tool.setuptools.dynamic]
+version = { attr = "onion_config.__version__.__version__" }
+dependencies = { file = "./requirements/requirements.core.txt" }
+optional-dependencies.pydantic-v1 = { file = [
+	"./requirements/requirements.pydantic-v1.txt",
+] }
+optional-dependencies.pydantic-settings = { file = [
+	"./requirements/requirements.pydantic-settings.txt",
+] }
+
+[project.urls]
+Homepage = "https://github.com/bybatkhuu/module.python-config"
+Documentation = "https://bybatkhuu.github.io/module.python-config"
+Repository = "https://github.com/bybatkhuu/module.python-config.git"
+Issues = "https://github.com/bybatkhuu/module.python-config/issues"
+Changelog = "https://github.com/bybatkhuu/module.python-config/CHANGELOG.md"

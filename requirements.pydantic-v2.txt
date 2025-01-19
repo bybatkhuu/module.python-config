@@ -1,3 +1,0 @@
--r requirements.core.txt
-pydantic[email]>2.0.0,!=2.0.1,!=2.1.0,<3.0.0
-pydantic-settings>=2.0.3,<3.0.0

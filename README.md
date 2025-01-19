@@ -1,16 +1,14 @@
-# onion_config
+# Onion Config (Python Config)
 
-[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit)
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/bybatkhuu/module.python-config/2.build-publish.yml?logo=GitHub)](https://github.com/bybatkhuu/module.python-config/actions/workflows/2.build-publish.yml)
-[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/bybatkhuu/module.python-config?logo=GitHub)](https://github.com/bybatkhuu/module.python-config/releases)
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/bybatkhuu/module.python-config?logo=GitHub&color=blue)](https://github.com/bybatkhuu/module.python-config/releases)
 [![PyPI](https://img.shields.io/pypi/v/onion-config?logo=PyPi)](https://pypi.org/project/onion-config)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/onion-config?logo=Python)](https://docs.conda.io/en/latest/miniconda.html)
 
-`onion_config` is a python package that allows for easy configuration management. It allows for loading and validating configuration data from environment variables and config files in JSON and YAML formats.
+`onion_config` is a Python package designed for easy configuration management. It supports loading and validating configuration data from environment variables and configuration files in JSON and YAML formats. It is a `Pydantic` based custom configuration package for Python projects.
 
-`Pydantic` based custom config package for python projects.
-
-## Features
+## ✨ Features
 
 - **Main config** based on **Pydantic schema** - <https://pypi.org/project/pydantic>
 - Load **environment variables** - <https://pypi.org/project/python-dotenv>
@@ -26,14 +24,62 @@
 
 ---
 
-## Installation
+## 🛠 Installation
 
-### 1. Prerequisites
+### 1. 🚧 Prerequisites
 
-- **Python (>= v3.8)**
-- **PyPi (>= v23)**
+- Install **Python (>= v3.9)** and **pip (>= 23)**:
+    - **[RECOMMENDED] [Miniconda (v3)](https://docs.anaconda.com/miniconda)**
+    - *[arm64/aarch64] [Miniforge (v3)](https://github.com/conda-forge/miniforge)*
+    - *[Python virutal environment] [venv](https://docs.python.org/3/library/venv.html)*
 
-### 2. Install onion-config package
+[OPTIONAL] For **DEVELOPMENT** environment:
+
+- Install [**git**](https://git-scm.com/downloads)
+- Setup an [**SSH key**](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh) ([video tutorial](https://www.youtube.com/watch?v=snCP3c7wXw0))
+
+### 2. 📥 Download or clone the repository
+
+> [!TIP]
+> Skip this step, if you're going to install the package directly from **PyPi** or **GitHub** repository.
+
+**2.1.** Prepare projects directory (if not exists):
+
+```sh
+# Create projects directory:
+mkdir -pv ~/workspaces/projects
+
+# Enter into projects directory:
+cd ~/workspaces/projects
+```
+
+**2.2.** Follow one of the below options **[A]**, **[B]** or **[C]**:
+
+**OPTION A.** Clone the repository:
+
+```sh
+git clone https://github.com/bybatkhuu/module.python-config.git && \
+    cd module.python-config
+```
+
+**OPTION B.** Clone the repository (for **DEVELOPMENT**: git + ssh key):
+
+```sh
+git clone git@github.com:bybatkhuu/module.python-config.git && \
+    cd module.python-config
+```
+
+**OPTION C.** Download source code:
+
+1. Download archived **zip** file from [**releases**](https://github.com/bybatkhuu/module.python-config/releases).
+2. Extract it into the projects directory.
+
+### 3. 📦 Install the package
+
+> [!NOTE]
+> Choose one of the following methods to install the package **[A ~ E]**:
+
+**OPTION A.** [**RECOMMENDED**] Install from **PyPi**:
 
 > [!WARNING]
 > If you wanted to use **Pydantic-v1**, but if you already installed `pydantic-settings` and `pydantic-core`, remove it before installing **Pydantic-v1**:
@@ -53,26 +99,13 @@ pip install -U onion-config[pydantic-v1]
 > So fix these issues re-install `onion-config` with `pydantic-settings`:
 
 ```sh
+# Install with pydantic-settings for Pydantic-v2:
 pip install -U onion-config[pydantic-settings]
 ```
 
-Choose one of the following methods to install the package **[A ~ F]**:
-
-**A.** [**RECOMMENDED**] Install from **PyPi**
+**OPTION B.** Install latest version directly from **GitHub** repository:
 
 ```sh
-# Install or upgrade package:
-# Pydantic-v1:
-pip install -U onion-config[pydantic-v1]
-
-# Pydantic-v2:
-pip install -U onion-config[pydantic-settings]
-```
-
-**B.** Install latest version from **GitHub**
-
-```sh
-# Install package by git:
 # Pydantic-v1:
 pip install git+https://github.com/bybatkhuu/module.python-config.git[pydantic-v1]
 
@@ -80,9 +113,25 @@ pip install git+https://github.com/bybatkhuu/module.python-config.git[pydantic-v
 pip install git+https://github.com/bybatkhuu/module.python-config.git[pydantic-settings]
 ```
 
-**C.** Install from **pre-built release** files
+**OPTION C.** Install from the downloaded **source code**:
 
-1. Download **`.whl`** or **`.tar.gz`** file from **releases** - <https://github.com/bybatkhuu/module.python-config/releases>
+```sh
+# Install directly from the source code:
+# Pydantic-v1:
+pip install .[pydantic-v1]
+# Pydantic-v2:
+pip install .[pydantic-settings]
+
+# Or install with editable mode (for DEVELOPMENT):
+# Pydantic-v1:
+pip install -e .[pydantic-v1]
+# Pydantic-v2:
+pip install -e .[pydantic-settings]
+```
+
+**OPTION D.** Install from **pre-built release** files:
+
+1. Download **`.whl`** or **`.tar.gz`** file from [**releases**](https://github.com/bybatkhuu/module.python-config/releases)
 2. Install with pip:
 
 ```sh
@@ -99,90 +148,34 @@ pip install ./onion_config-[VERSION]-py3-none-any.whl[pydantic-settings]
 pip install ./onion_config-[VERSION].tar.gz[pydantic-settings]
 ```
 
-**D.** Install from **source code** by building package
+**OPTION E.** Copy the **module** into the project directory (for **testing**):
 
 ```sh
-# Clone repository by git:
-git clone https://github.com/bybatkhuu/module.python-config.git onion_config
-cd ./onion_config
-
-# Install python build tool:
-pip install -U pip build
-
-# Build python package:
-python -m build
-
-_VERSION=$(./scripts/get-version.sh)
-
-# Pydantic-v1:
-# Install from .whl file:
-pip install ./dist/onion_config-${_VERSION}-py3-none-any.whl[pydantic-v1]
-# Or install from .tar.gz file:
-pip install ./dist/onion_config-${_VERSION}.tar.gz[pydantic-v1]
-
-# Pydantic-v2:
-# Install from .whl file:
-pip install ./dist/onion_config-${_VERSION}-py3-none-any.whl[pydantic-settings]
-# Or install from .tar.gz file:
-pip install ./dist/onion_config-${_VERSION}.tar.gz[pydantic-settings]
-```
-
-**E.** Install with pip editable **development mode** (from source code)
-
-```sh
-# Clone repository by git:
-git clone https://github.com/bybatkhuu/module.python-config.git onion_config
-cd ./onion_config
-
-# Install with editable development mode:
-# Pydantic-v1:
-pip install -e .[pydantic-v1]
-
-# Pydantic-v2:
-pip install -e .[pydantic-settings]
-```
-
-**F.** Manually add to **PYTHONPATH** (not recommended)
-
-```sh
-# Clone repository by git:
-git clone https://github.com/bybatkhuu/module.python-config.git onion_config
-cd ./onion_config
-
 # Install python dependencies:
+pip install -r ./requirements/requirements.core.txt
+
 # Pydantic-v1:
-pip install -r ./requirements.txt
-
+pip install -r ./requirements/requirements.pydantic-v1.txt
 # Pydantic-v2:
-pip install -r ./requirements.pydantic-v2.txt
+pip install -r ./requirements/requirements.pydantic-settings.txt
 
-# Add current path to PYTHONPATH:
-export PYTHONPATH="${PWD}:${PYTHONPATH}"
+# Copy the module source code into the project:
+cp -r ./src/onion_config [PROJECT_DIR]
+# For example:
+cp -r ./src/onion_config /some/path/project/
 ```
 
-## Usage/Examples
+## 🚸 Usage/Examples
 
-To use `onion_config`, import the `ConfigLoader` class from the package:
+### Simple
 
-```python
-from onion_config import ConfigLoader, BaseConfig
-```
-
-You can create an instance of `ConfigLoader` with `auto_load` flag. This will automatically load configuration data from environment variables and config files located in the default directory (`'./configs'`). The configuration data can then be accessed via the `config` property of the `ConfigLoader` instance:
-
-```python
-config: BaseConfig = ConfigLoader(auto_load=True).config
-```
-
-### **Simple**
-
-[**`.env`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/simple/.env)
+[**`examples/simple/.env`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/simple/.env)
 
 ```sh
 ENV=production
 ```
 
-[**`configs/1.base.yml`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/simple/configs/1.base.yml):
+[**`examples/simple/configs/1.base.yml`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/simple/configs/1.base.yml):
 
 ```yaml
 env: test
@@ -194,7 +187,7 @@ app:
     key: "value"
 ```
 
-[**`configs/2.extra.yml`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/simple/configs/2.extra.yml):
+[**`examples/simple/configs/2.extra.yml`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/simple/configs/2.extra.yml):
 
 ```yaml
 app:
@@ -207,7 +200,7 @@ another_val:
   extra: 1
 ```
 
-[**`main.py`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/simple/main.py)
+[**`examples/simple/main.py`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/simple/main.py)
 
 ```python
 import pprint
@@ -266,9 +259,9 @@ python ./main.py
  'env': 'production'}
 ```
 
-### **Advanced**
+### Advanced
 
-[**`.env.base`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/.env.base):
+[**`examples/advanced/.env.base`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/.env.base):
 
 ```sh
 ENV=development
@@ -277,7 +270,7 @@ APP_NAME="Old App"
 ONION_CONFIG_EXTRA_DIR="extra_configs"
 ```
 
-[**`.env.prod`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/.env.prod):
+[**`examples/advanced/.env.prod`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/.env.prod):
 
 ```sh
 ENV=production
@@ -285,7 +278,7 @@ APP_NAME="New App"
 APP_SECRET="my_secret"
 ```
 
-[**`configs/config.yml`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/configs/config.yml):
+[**`examples/advanced/configs/config.yml`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/configs/config.yml):
 
 ```yaml
 env: local
@@ -301,7 +294,7 @@ logger:
   output: "file"
 ```
 
-[**`configs/logger.json`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/configs/logger.json):
+[**`examples/advanced/configs/logger.json`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/configs/logger.json):
 
 ```json
 {
@@ -312,7 +305,7 @@ logger:
 }
 ```
 
-[**`configs_2/config.yml`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/configs_2/config.yml):
+[**`examples/advanced/configs_2/config.yml`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/configs_2/config.yml):
 
 ```yaml
 extra:
@@ -320,7 +313,7 @@ extra:
     key1: 1
 ```
 
-[**`configs_2/config_2.yml`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/configs_2/config_2.yml):
+[**`examples/advanced/configs_2/config_2.yml`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/configs_2/config_2.yml):
 
 ```yaml
 extra:
@@ -328,7 +321,7 @@ extra:
     key2: 2
 ```
 
-[**`extra_configs/extra.json`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/extra_configs/extra.json):
+[**`examples/advanced/extra_configs/extra.json`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/extra_configs/extra.json):
 
 ```json
 {
@@ -338,7 +331,7 @@ extra:
 }
 ```
 
-[**`schema.py`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/schema.py):
+[**`examples/advanced/schema.py`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/schema.py):
 
 ```python
 from enum import Enum
@@ -392,7 +385,7 @@ class ConfigSchema(BaseConfig):
     app: AppConfig = Field(...)
 ```
 
-[**`config.py`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/config.py):
+[**`examples/advanced/config.py`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/config.py):
 
 ```python
 from loguru import logger
@@ -426,7 +419,7 @@ except Exception:
 
 ```
 
-[**`main.py`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/main.py):
+[**`examples/advanced/main.py`**](https://github.com/bybatkhuu/module.python-config/blob/main/examples/advanced/main.py):
 
 ```python
 import pprint
@@ -504,55 +497,115 @@ python ./main.py
 2023-09-01 00:00:00.000 | ERROR    | __main__:<module>:36 - "AppConfig" is immutable and does not support item assignment
 ```
 
+👍
+
 ---
 
-## Running Tests
+### 🌎 Environment Variables
+
+[**`.env.example`**](https://github.com/bybatkhuu/module.python-config/blob/main/.env.example):
+
+```sh
+# ENV=development
+# DEBUG=true
+
+ONION_CONFIG_EXTRA_DIR="./extra_configs"
+```
+
+---
+
+## 🧪 Running Tests
 
 To run tests, run the following command:
 
 ```sh
 # Pydantic-v1:
-pip install -r ./requirements.txt
+pip install -r ./requirements/requirements.pydantic-v1.txt
 
 # Pydantic-v2:
-pip install -r ./requirements.pydantic-v2.txt
+pip install -r ./requirements/requirements.pydantic-settings.txt
 
 # Install python test dependencies:
 pip install -r ./requirements.test.txt
 
 # Run tests:
-python -m pytest -v
+python -m pytest -sv -o log_cli=true
+# Or use the test script:
+./scripts/test.sh -l -v -c
 ```
 
-## FAQ
+## 🏗️ Build Package
 
-### What is the order of loading config?
-
-Load order:
-
-1. Load all dotenv files from `env_file_paths` into environment variables.
-2. Check if required environment variables exist or not.
-3. Load all config files from `configs_dirs` into `config_data`.
-4. Load extra config files from `extra_dir` into `config_data`.
-5. Execute `pre_load_hook` method to modify `config_data`.
-6. Init `config_schema` with `config_data` into final **`config`**.
-
-## Environment Variables
-
-You can use the following environment variables inside [**`.env.example`**](https://github.com/bybatkhuu/module.python-config/blob/main/.env.example) file:
+To build the python package, run the following command:
 
 ```sh
-ONION_CONFIG_EXTRA_DIR="./extra_configs"
+# Install python build dependencies:
+pip install -r ./requirements/requirements.build.txt
+
+# Build python package:
+python -m build
+# Or use the build script:
+./scripts/build.sh
 ```
 
-## Documentation
+## 📝 Generate Docs
 
-- [docs](https://github.com/bybatkhuu/module.python-config/blob/main/docs/README.md)
-- [scripts](https://github.com/bybatkhuu/module.python-config/blob/main/docs/scripts/README.md)
+To build the documentation, run the following command:
+
+```sh
+# Install python documentation dependencies:
+pip install -r ./requirements/requirements.docs.txt
+
+# Serve documentation locally (for development):
+mkdocs serve
+# Or use the docs script:
+./scripts/docs.sh
+
+# Or build documentation:
+mkdocs build
+# Or use the docs script:
+./scripts/docs.sh -b
+```
+
+## 📚 Documentation
+
+- [Docs](https://github.com/bybatkhuu/module.python-config/blob/main/docs)
+- [Home](https://github.com/bybatkhuu/module.python-config/blob/main/docs/README.md)
+
+### Getting Started
+
+- [Prerequisites](https://github.com/bybatkhuu/module.python-config/blob/main/docs/pages/getting-started/prerequisites.md)
+- [Installation](https://github.com/bybatkhuu/module.python-config/blob/main/docs/pages/getting-started/installation.md)
+- [Configuration](https://github.com/bybatkhuu/module.python-config/blob/main/docs/pages/getting-started/configuration.md)
+- [Examples](https://github.com/bybatkhuu/module.python-config/blob/main/docs/pages/getting-started/examples.md)
+- [Error Codes](https://github.com/bybatkhuu/module.python-config/blob/main/docs/pages/getting-started/error-codes.md)
+
+### [API Documentation](https://github.com/bybatkhuu/module.python-config/blob/main/docs/pages/api-docs/README.md)
+
+### Development
+
+- [Test](https://github.com/bybatkhuu/module.python-config/blob/main/docs/pages/dev/test.md)
+- [Build](https://github.com/bybatkhuu/module.python-config/blob/main/docs/pages/dev/build.md)
+- [Docs](https://github.com/bybatkhuu/module.python-config/blob/main/docs/pages/dev/docs.md)
+- [CI/CD](https://github.com/bybatkhuu/module.python-config/blob/main/docs/pages/dev/cicd.md)
+- [Scripts](https://github.com/bybatkhuu/module.python-config/blob/main/docs/pages/dev/scripts/README.md)
+- [File Structure](https://github.com/bybatkhuu/module.python-config/blob/main/docs/pages/dev/file-structure.md)
+- [Sitemap](https://github.com/bybatkhuu/module.python-config/blob/main/docs/pages/dev/sitemap.md)
+- [Contributing](https://github.com/bybatkhuu/module.python-config/blob/main/docs/pages/dev/contributing.md)
+- [Roadmap](https://github.com/bybatkhuu/module.python-config/blob/main/docs/pages/dev/roadmap.md)
+
+### [Release Notes](https://github.com/bybatkhuu/module.python-config/blob/main/docs/pages/release-notes.md)
+
+### About
+
+- [FAQ](https://github.com/bybatkhuu/module.python-config/blob/main/docs/pages/about/faq.md)
+- [Authors](https://github.com/bybatkhuu/module.python-config/blob/main/docs/pages/about/authors.md)
+- [Contact](https://github.com/bybatkhuu/module.python-config/blob/main/docs/pages/about/contact.md)
+- [License](https://github.com/bybatkhuu/module.python-config/blob/main/docs/pages/about/license.md)
 
 ---
 
-## References
+## 📑 References
 
 - <https://docs.pydantic.dev>
 - <https://github.com/pydantic/pydantic>

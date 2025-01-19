@@ -12,7 +12,7 @@ cd "${_PROJECT_DIR}" || exit 2
 # shellcheck disable=SC1091
 source ./scripts/base.sh
 
-# Loading .env file:
+# Loading .env file (if exists):
 if [ -f ".env" ]; then
 	# shellcheck disable=SC1091
 	source .env
@@ -22,14 +22,15 @@ fi
 
 ## --- Variables --- ##
 # Load from envrionment variables:
-VERSION_FILE="${VERSION_FILE:-onion_config/__version__.py}"
+VERSION_FILE_PATH="${VERSION_FILE_PATH:-./src/onion_config/__version__.py}"
 
 
 _BUMP_TYPE=""
-# _BUMP_TYPE="patch"
 
 # Flags:
-_IS_PUSH_TAG=false
+_IS_COMMIT=false
+_IS_TAG=false
+_IS_PUSH=false
 ## --- Variables --- ##
 
 
@@ -43,12 +44,18 @@ main()
 				-b=* | --bump-type=*)
 					_BUMP_TYPE="${_input#*=}"
 					shift;;
-				-p | --push-tag)
-					_IS_PUSH_TAG=true
+				-c | --commit)
+					_IS_COMMIT=true
+					shift;;
+				-t | --tag)
+					_IS_TAG=true
+					shift;;
+				-p | --push)
+					_IS_PUSH=true
 					shift;;
 				*)
 					echoError "Failed to parsing input -> ${_input}"
-					echoInfo "USAGE: ${0}  -b=*, --bump-type=* [major | minor | patch] | -p, --push-tag"
+					echoInfo "USAGE: ${0}  -b=*, --bump-type=* [major | minor | patch] | -c, --commit | -t, --tag | -p, --push"
 					exit 1;;
 			esac
 		done
@@ -66,7 +73,7 @@ main()
 		exit 1
 	fi
 
-	if [ "${_IS_PUSH_TAG}" == true ]; then
+	if [ "${_IS_COMMIT}" == true ]; then
 		exitIfNoGit
 	fi
 
@@ -92,26 +99,36 @@ main()
 
 	echoInfo "Bumping version to '${_new_version}'..."
 	# Update the version file with the new version:
-	echo -e "# -*- coding: utf-8 -*-\n\n__version__ = \"${_new_version}\"" > "${VERSION_FILE}" || exit 2
+	echo -e "__version__ = \"${_new_version}\"" > "${VERSION_FILE_PATH}" || exit 2
 	echoOk "New version: '${_new_version}'"
 
-	if [ "${_IS_PUSH_TAG}" == true ]; then
-		echoInfo "Pushing git tag 'v${_new_version}'..."
-		if git rev-parse "v${_new_version}" > /dev/null 2>&1; then
-			echoError "'v${_new_version}' tag is already exists."
-			exit 1
-		else
-			# Commit the updated version file:
-			git add "${VERSION_FILE}" || exit 2
-			git commit -m ":bookmark: Bump version to '${_new_version}'." || exit 2
+	if [ "${_IS_COMMIT}" == true ]; then
+		echoInfo "Committing bump version 'v${_new_version}'..."
+		# Commit the updated version file:
+		git add "${VERSION_FILE_PATH}" || exit 2
+		git commit -m ":bookmark: Bump version to '${_new_version}'." || exit 2
+		echoOk "Done."
+
+		if [ "${_IS_TAG}" == true ]; then
+			echoInfo "Tagging 'v${_new_version}'..."
+			if git rev-parse "v${_new_version}" > /dev/null 2>&1; then
+				echoError "'v${_new_version}' tag is already exists."
+				exit 1
+			fi
+			git tag "v${_new_version}" || exit 2
+			echoOk "Done."
+		fi
+
+		if [ "${_IS_PUSH}" == true ]; then
+			echoInfo "Pushing 'v${_new_version}'..."
 			git push || exit 2
 
-			git tag "v${_new_version}" || exit 2
-			# git push origin "v${_new_version}" || exit 2
-			# shellcheck disable=SC1083
-			git push "$(git rev-parse --abbrev-ref --symbolic-full-name @{upstream} | sed 's/\/.*//')" "v${_new_version}" || exit 2
+			if [ "${_IS_TAG}" == true ]; then
+				# shellcheck disable=SC1083
+				git push "$(git rev-parse --abbrev-ref --symbolic-full-name @{upstream} | sed 's/\/.*//')" "v${_new_version}" || exit 2
+			fi
+			echoOk "Done."
 		fi
-		echoOk "Done."
 	fi
 }
 
