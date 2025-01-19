@@ -22,10 +22,11 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.9"
-      - name: Install dependencies (pytest)
+      - name: Install dependencies
         run: |
           python -m pip install -U pip
           python -m pip install -r ./requirements/requirements.test.txt
+          python -m pip install -r ./requirements/requirements.core.txt
       - name: Install dependencies (pydantic-v1)
         run: |
           python -m pip install -r ./requirements/requirements.pydantic-v1.txt

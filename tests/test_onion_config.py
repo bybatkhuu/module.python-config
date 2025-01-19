@@ -18,7 +18,10 @@ if "2.0.0" <= pydantic.__version__:
     except ImportError:
         pass
 
-from onion_config import ConfigLoader, BaseConfig, WarnEnum
+try:
+    from onion_config import ConfigLoader, BaseConfig, WarnEnum
+except ImportError:
+    from src.onion_config import ConfigLoader, BaseConfig, WarnEnum
 
 
 logger = logging.getLogger(__name__)
