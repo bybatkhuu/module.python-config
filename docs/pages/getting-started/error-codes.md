@@ -1,0 +1,3 @@
+# 🚨 Error Codes
+
+## Error Handling

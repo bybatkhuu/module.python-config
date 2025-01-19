@@ -1,1 +1,1 @@
--e ..[pydantic-v1]
+-e ..[pydantic-settings]

@@ -1,0 +1,2 @@
+# -r ./requirements.core.txt
+pydantic[email,dotenv]>=1.10.14,<2.0.0
